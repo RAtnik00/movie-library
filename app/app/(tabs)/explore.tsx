@@ -1,112 +1,136 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+type Movie = {
+  id: string;
+  title: string;
+  director: string;
+  score: number;
+  favorite: boolean;
+};
 
-export default function TabTwoScreen() {
+export default function ListScreen() {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [movies, setMovies] = useState<Movie[]>([
+    {
+      id: "1",
+      title: "The Shawshank Redemption",
+      director: "Frank Darabont",
+      score: 8.6,
+      favorite: false,
+    },
+    {
+      id: "2",
+      title: "The Godfather",
+      director: "Francis Ford Coppola",
+      score: 9.2,
+      favorite: false,
+    },
+    {
+      id: "3",
+      title: "Scary Movie",
+      director: "Keenen Ivory Wayans",
+      score: 7.0,
+      favorite: true,
+    },
+  ]);
+
+  const toggleFavorite = (id: string) => {
+    setMovies((prev) =>
+      prev.map((movie) =>
+        movie.id === id ? { ...movie, favorite: !movie.favorite } : movie,
+      ),
+    );
+  };
+
+  const filteredMovies = movies.filter((movie) =>
+    movie.title.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <Text style={styles.text}>Search bar</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Your movie"
+        placeholderTextColor="#b5a5a5"
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+      <FlatList
+        data={filteredMovies}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            <View style={styles.header}>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
+                <Ionicons
+                  name={item.favorite ? "star" : "star-outline"}
+                  size={24}
+                  color={item.favorite ? "#FFD700" : "white"}
+                />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.cardText}>Director: {item.director}</Text>
+            <Text style={styles.cardText}>Score: {item.score}</Text>
+          </View>
+        )}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: "black",
+    justifyContent: "flex-start",
+    padding: 20,
+    marginTop: 50,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  text: {
+    color: "white",
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  input: {
+    backgroundColor: "#222020",
+    color: "white",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 15,
+  },
+  card: {
+    backgroundColor: "#222020",
+    padding: 15,
+    borderRadius: 5,
+    marginTop: 15,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  cardTitle: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  cardText: {
+    color: "#b5a5a5",
+    fontSize: 14,
+    marginTop: 5,
   },
 });
