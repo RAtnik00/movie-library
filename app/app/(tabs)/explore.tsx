@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
+  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -58,20 +59,28 @@ export default function ListScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Search bar</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Your movie"
-        placeholderTextColor="#b5a5a5"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
+      <Text style={styles.header}>Search bar</Text>
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="search"
+          size={18}
+          color="#b5a5a5"
+          style={styles.inputIcon}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Your movie"
+          placeholderTextColor="#b5a5a5"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
       <FlatList
         data={filteredMovies}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <View style={styles.header}>
+            <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>{item.title}</Text>
               <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
                 <Ionicons
@@ -81,8 +90,41 @@ export default function ListScreen() {
                 />
               </TouchableOpacity>
             </View>
-            <Text style={styles.cardText}>Director: {item.director}</Text>
-            <Text style={styles.cardText}>Score: {item.score}</Text>
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <View>
+                <Text style={styles.cardText}>Director: {item.director}</Text>
+                <Text style={styles.cardText}>Score: {item.score}</Text>
+              </View>
+              <View style={styles.iconContainer}>
+                <Ionicons
+                  name="trash"
+                  size={18}
+                  color="white"
+                  style={styles.addIcon}
+                  onPress={() =>
+                    Alert.alert(
+                      "Deleting",
+                      "Are you sure you want to delete this movie?",
+                      [
+                        { text: "Cancel", style: "cancel" },
+                        {
+                          text: "OK",
+                          onPress: () => console.log("OK pressed"),
+                        },
+                      ],
+                    )
+                  }
+                />
+                <Ionicons
+                  name="add-outline"
+                  size={18}
+                  color="white"
+                  style={styles.addIcon}
+                />
+              </View>
+            </View>
           </View>
         )}
       />
@@ -98,18 +140,27 @@ const styles = StyleSheet.create({
     padding: 20,
     marginTop: 50,
   },
-  text: {
+  header: {
     color: "white",
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
+    marginBottom: 5,
   },
   input: {
-    backgroundColor: "#222020",
-    color: "white",
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 15,
+    color: "#fff",
+    flex: 1,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+  },
+  inputIcon: {
+    marginRight: 6,
   },
   card: {
     backgroundColor: "#222020",
@@ -117,7 +168,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 15,
   },
-  header: {
+  cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -132,5 +183,17 @@ const styles = StyleSheet.create({
     color: "#b5a5a5",
     fontSize: 14,
     marginTop: 5,
+  },
+  iconContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  addIcon: {
+    alignSelf: "flex-end",
+    borderWidth: 1,
+    borderColor: "#fff",
+    borderRadius: 13,
+    padding: 3,
   },
 });
