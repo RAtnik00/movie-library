@@ -1,7 +1,5 @@
 from fastapi import FastAPI
+from app.routes.health import router
 
 app = FastAPI()
-
-@app.get("/")
-def test_route():
-    return {"Hello": "World"}
+app.include_router(router)
