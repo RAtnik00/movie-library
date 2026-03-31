@@ -12,3 +12,7 @@ class RegisterResponse(BaseModel):
     username: str
     email: EmailStr
     created_at: datetime.datetime
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
