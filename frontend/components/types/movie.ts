@@ -1,0 +1,7 @@
+export type Movie = {
+  id: string;
+  title: string;
+  director: string;
+  score: number;
+  favorite: boolean;
+};
