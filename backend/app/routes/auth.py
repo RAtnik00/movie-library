@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.params import Depends
 from sqlalchemy import select, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.security import get_password_hash
+from app.core.security import get_password_hash, get_current_user
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import RegisterRequest, RegisterResponse, LoginRequest, LoginResponse
@@ -68,4 +69,13 @@ def login_user(body: LoginRequest, db: Session = Depends(get_db)):
     return LoginResponse(
         access_token=access_token,
         token_type="bearer",
+    )
+
+@router.get("/me", response_model=RegisterResponse)
+def get_me(current_user: User = Depends(get_current_user)):
+    return RegisterResponse(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        created_at=current_user.created_at,
     )
