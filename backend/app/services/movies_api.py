@@ -11,3 +11,9 @@ class MoviesAPIClient:
         params = {"page": 1, "api_key": self.api_key}
         response = httpx.get(url, params=params)
         return response.json()
+
+    def get_search(self, query: str):
+        url = f"{self.base_url}/search/movie"
+        params = {"page": 1, "query": query, "api_key": self.api_key}
+        response = httpx.get(url, params=params)
+        return response.json()

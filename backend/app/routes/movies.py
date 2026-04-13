@@ -9,3 +9,7 @@ router = APIRouter()
 @router.get("/movies")
 def get_movies(client: MoviesAPIClient = Depends(get_movies_api_client)):
     return client.get_popular()
+
+@router.get("/movies/search")
+def get_search(query: str, client: MoviesAPIClient = Depends(get_movies_api_client)):
+    return client.get_search(query)
