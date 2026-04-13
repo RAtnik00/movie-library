@@ -13,3 +13,7 @@ def get_movies(client: MoviesAPIClient = Depends(get_movies_api_client)):
 @router.get("/movies/search")
 def get_search(query: str, client: MoviesAPIClient = Depends(get_movies_api_client)):
     return client.get_search(query)
+
+@router.get("/movies/{movie_id}")
+def get_movie(movie_id: int, client: MoviesAPIClient = Depends(get_movies_api_client)):
+    return client.get_movie(movie_id)
