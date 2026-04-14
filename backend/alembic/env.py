@@ -7,6 +7,7 @@ from sqlalchemy import engine_from_config, pool
 
 from app.database import Base
 from app.models.user import User
+from app.models.refresh_token import RefreshToken
 
 load_dotenv()
 
