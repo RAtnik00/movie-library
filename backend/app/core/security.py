@@ -1,25 +1,18 @@
-import os
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, Depends
 from jose import jwt, JWTError
-from dotenv import load_dotenv
 from pwdlib import PasswordHash
 from fastapi.security import OAuth2PasswordBearer
 from starlette import status
 
 from app.database import get_db
 from app.models.user import User
+from app.core.config import settings
 
 from sqlalchemy.orm import Session
 
-load_dotenv()
-
 password_hash = PasswordHash.recommended()
-
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -46,15 +39,15 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
 def decode_access_token(token: str) -> int:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id = payload.get("sub")
         if user_id is None:
             raise HTTPException(
@@ -64,7 +57,7 @@ def decode_access_token(token: str) -> int:
 
         return int(user_id)
 
-    except JWTError as e:
+    except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

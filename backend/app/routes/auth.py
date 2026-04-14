@@ -5,12 +5,10 @@ from sqlalchemy import select, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.security import get_password_hash, get_current_user
+from app.core.security import get_password_hash, get_current_user, create_access_token, verify_password
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import RegisterRequest, RegisterResponse, LoginResponse
-from app.core.security import verify_password
-from app.core.security import create_access_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
