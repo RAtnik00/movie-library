@@ -12,6 +12,9 @@ from app.core.config import settings
 
 from sqlalchemy.orm import Session
 
+import hashlib
+import secrets
+
 password_hash = PasswordHash.recommended()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -62,3 +65,12 @@ def decode_access_token(token: str) -> int:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
+
+def hash_token(token: str) -> str:
+    token_bytes = token.encode("utf-8")
+    sha256_hash = hashlib.sha256(token_bytes)
+    return sha256_hash.hexdigest()
+
+def create_refresh_token() -> str:
+    token = secrets.token_urlsafe(settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+    return token
