@@ -1,5 +1,6 @@
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.params import Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select, or_
 from sqlalchemy.exc import IntegrityError
@@ -8,7 +9,10 @@ from sqlalchemy.orm import Session
 from app.core.security import get_password_hash, get_current_user, create_access_token, verify_password
 from app.database import get_db
 from app.models.user import User
-from app.schemas.user import RegisterRequest, RegisterResponse, LoginResponse
+from app.models.refresh_token import RefreshToken
+from app.schemas.user import RegisterRequest, RegisterResponse, LoginResponse, RefreshTokenRequest
+
+from app.core.security import create_refresh_token, hash_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -64,11 +68,48 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = D
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
     access_token = create_access_token(data={"sub": str(user.id)})
+    refresh_token = create_refresh_token()
+    refresh_token_hash = hash_token(refresh_token)
 
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+
+    new_token_entry = RefreshToken(
+        user_id=user.id,
+        token_hash=refresh_token_hash,
+        expires_at=expires_at,
+    )
+
+    db.add(new_token_entry)
+    db.commit()
     return LoginResponse(
         access_token=access_token,
+        refresh_token=refresh_token,
         token_type="bearer",
     )
+
+@router.post("/refresh")
+def refresh_token(body: RefreshTokenRequest, db: Session = Depends(get_db)):
+    token_hash = hash_token(body.refresh_token)
+
+    stmt = select(RefreshToken).where(RefreshToken.token_hash == token_hash)
+    token_entry = db.execute(stmt).scalar_one_or_none()
+
+    if token_entry is None:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    if token_entry.revoked_at is not None:
+        raise HTTPException(status_code=401, detail="Refresh token revoked")
+
+    if token_entry.expires_at < datetime.now():
+        raise HTTPException(status_code=401, detail="Refresh token expired")
+
+    access_token = create_access_token(data={"sub": str(token_entry.user_id)})
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
+
 
 @router.get("/me", response_model=RegisterResponse)
 def get_me(current_user: User = Depends(get_current_user)):
