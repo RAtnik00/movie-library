@@ -1,5 +1,6 @@
 from app.database import Base
 from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import relationship
 import datetime
 
 
@@ -11,3 +12,4 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
