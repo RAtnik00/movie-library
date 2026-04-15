@@ -10,7 +10,7 @@ from app.core.security import get_password_hash, get_current_user, create_access
 from app.database import get_db
 from app.models.user import User
 from app.models.refresh_token import RefreshToken
-from app.schemas.user import RegisterRequest, RegisterResponse, LoginResponse, RefreshTokenRequest
+from app.schemas.user import RegisterRequest, RegisterResponse, LoginResponse, RefreshTokenRequest, LogoutRequest
 
 from app.core.security import create_refresh_token, hash_token
 
@@ -86,6 +86,23 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = D
         refresh_token=refresh_token,
         token_type="bearer",
     )
+
+@router.post("/logout")
+def logout_user(body: LogoutRequest, db: Session = Depends(get_db)):
+    token_hash = hash_token(body.refresh_token)
+    stmt = select(RefreshToken).where(RefreshToken.token_hash == token_hash)
+    result = db.execute(stmt)
+    token_entry = result.scalar_one_or_none()
+    if token_entry is None:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    if token_entry.revoked_at is not None:
+        raise HTTPException(status_code=401, detail="Token already revoked")
+
+    token_entry.revoked_at = datetime.datetime.now(datetime.timezone.utc)
+    db.commit()
+
+    return {"message": "Logged out"}
+
 
 @router.post("/refresh")
 def refresh_token(body: RefreshTokenRequest, db: Session = Depends(get_db)):
