@@ -13,3 +13,4 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
+    favorites = relationship("Favorite", back_populates="user")
