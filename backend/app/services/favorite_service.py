@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.movie import Movie
 from app.models.favorite import Favorite
-from app.services.movie_api import MoviesAPIClient
+from app.services.movies_api import MoviesAPIClient
 
 def get_movie_by_tmdb_id(db: Session, tmdb_id: int) -> Movie | None:
     stmt = select(Movie).where(Movie.tmdb_id == tmdb_id)
