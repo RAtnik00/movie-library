@@ -70,3 +70,22 @@ def get_user_favorites(db: Session, user: User) -> list[Favorite]:
     stmt = select(Favorite).where(Favorite.user_id == user.id)
     result = db.execute(stmt)
     return result.scalars().all()
+
+def remove_from_favorites(db: Session, user: User, tmdb_id: int) -> Favorite | None:
+    movie = get_movie_by_tmdb_id(db, tmdb_id)
+    if movie is None:
+        return None
+
+    stmt = select(Favorite).where(
+        Favorite.user_id == user.id,
+        Favorite.movie_id == movie.id,
+    )
+    result = db.execute(stmt)
+    favorite = result.scalar_one_or_none()
+
+    if favorite is None:
+        return None
+
+    db.delete(favorite)
+    db.commit()
+    return favorite
