@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.movie import Movie
 from app.models.favorite import Favorite
+from app.models.user import User
 from app.services.movies_api import MoviesAPIClient
 
 def get_movie_by_tmdb_id(db: Session, tmdb_id: int) -> Movie | None:
@@ -64,3 +65,8 @@ def add_to_favorites(db: Session, user, tmdb_id: int, client: MoviesAPIClient):
     db.commit()
     db.refresh(favorite)
     return favorite
+
+def get_user_favorites(db: Session, user: User) -> list[Favorite]:
+    stmt = select(Favorite).where(Favorite.user_id == user.id)
+    result = db.execute(stmt)
+    return result.scalars().all()

@@ -6,7 +6,7 @@ from app.services.movies_api import MoviesAPIClient
 from app.database import get_db
 from app.core.security import get_current_user
 from app.schemas.user import AddFavoriteRequest
-from app.services.favorite_service import add_to_favorites
+from app.services.favorite_service import add_to_favorites, get_user_favorites
 from app.models.user import User
 
 from sqlalchemy.orm import Session
@@ -33,3 +33,7 @@ def add_favorites(
         current_user: User = Depends(get_current_user)
 ):
     return add_to_favorites(db, current_user, body.tmdb_id, client)
+
+@router.get("/favorites")
+def get_favorites(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return get_user_favorites(db, current_user)
