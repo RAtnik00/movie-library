@@ -98,7 +98,7 @@ def logout_user(body: LogoutRequest, db: Session = Depends(get_db)):
     if token_entry.revoked_at is not None:
         raise HTTPException(status_code=401, detail="Token already revoked")
 
-    token_entry.revoked_at = datetime.datetime.now(datetime.timezone.utc)
+    token_entry.revoked_at = datetime.now(timezone.utc)
     db.commit()
 
     return {"message": "Logged out"}
