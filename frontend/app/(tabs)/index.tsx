@@ -1,12 +1,11 @@
 import React from "react";
-import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, Pressable, Text, TextInput, View } from "react-native";
 
 export default function VerstkaLogin() {
   return (
     <View
       style={{
         flex: 1,
-        backgroundColor: "black",
         justifyContent: "center",
         padding: 20,
       }}
@@ -48,7 +47,7 @@ export default function VerstkaLogin() {
         secureTextEntry={true}
       />
 
-      <TouchableOpacity
+      <Pressable
         style={{
           backgroundColor: "green",
           padding: 15,
@@ -57,7 +56,7 @@ export default function VerstkaLogin() {
         }}
       >
         <Text style={{ color: "white", fontSize: 16 }}>Login</Text>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }
