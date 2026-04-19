@@ -6,6 +6,7 @@ import { Movie } from "./types/movie";
 interface MovieCardProps extends Movie {
   onDelete: (id: string) => void;
   onToggleFavorite: (id: string) => void;
+  onPress: () => void;
 }
 
 export default function MovieCard({
@@ -16,31 +17,31 @@ export default function MovieCard({
   favorite,
   onDelete,
   onToggleFavorite,
+  onPress,
 }: MovieCardProps) {
   return (
-    <View style={styles.card}>
+    <Pressable onPress={onPress} style={styles.card}>
       <View style={styles.cardHeader}>
         <Text style={styles.cardTitle}>{title}</Text>
         <View style={styles.iconContainer}>
           <Pressable onPress={() => onToggleFavorite(id)}>
             <Ionicons
-              name={favorite ? "star" : "star-outline"}
+              name={favorite ? "heart" : "heart-outline"}
               size={24}
-              color={favorite ? "#FFD700" : "white"}
+              color={favorite ? "#ff4d4d" : "white"}
             />
           </Pressable>
-          <Ionicons
-            name="trash"
-            size={18}
-            color="white"
-            onPress={() => onDelete(id)}
-          />
+          <View style={styles.deleteIcon}>
+            <Pressable onPress={() => onDelete(id)} style={styles.deleteIcon}>
+              <Ionicons name="trash" size={18} color="white" />
+            </Pressable>
+          </View>
         </View>
       </View>
 
       <Text style={styles.cardText}>Director: {director}</Text>
       <Text style={styles.cardText}>Score: {score}</Text>
-    </View>
+    </Pressable>
   );
 }
 
@@ -100,5 +101,12 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
     borderRadius: 13,
     padding: 3,
+  },
+  deleteIcon: {
+    backgroundColor: "#D11A2A",
+    padding: 4,
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

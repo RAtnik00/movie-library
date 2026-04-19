@@ -4,4 +4,6 @@ export type Movie = {
   director: string;
   score: number;
   favorite: boolean;
+  poster: string;
+  desc: string;
 };
