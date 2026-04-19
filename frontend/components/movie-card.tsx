@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Text } from "@react-navigation/elements";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Image, Pressable, StyleSheet, View } from "react-native";
 import { Movie } from "./types/movie";
 
 interface MovieCardProps extends Movie {
@@ -11,101 +10,70 @@ interface MovieCardProps extends Movie {
 
 export default function MovieCard({
   id,
-  title,
-  director,
-  score,
   favorite,
-  onDelete,
+  poster,
   onToggleFavorite,
   onPress,
 }: MovieCardProps) {
   return (
-    <Pressable onPress={onPress} style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle}>{title}</Text>
-        <View style={styles.iconContainer}>
-          <Pressable onPress={() => onToggleFavorite(id)}>
-            <Ionicons
-              name={favorite ? "heart" : "heart-outline"}
-              size={24}
-              color={favorite ? "#ff4d4d" : "white"}
-            />
-          </Pressable>
-          <View style={styles.deleteIcon}>
-            <Pressable onPress={() => onDelete(id)} style={styles.deleteIcon}>
-              <Ionicons name="trash" size={18} color="white" />
-            </Pressable>
-          </View>
-        </View>
-      </View>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+    >
+      <Image
+        source={{ uri: poster }}
+        style={styles.poster}
+        resizeMode="cover"
+      />
 
-      <Text style={styles.cardText}>Director: {director}</Text>
-      <Text style={styles.cardText}>Score: {score}</Text>
+      <View style={styles.overlay}>
+        <Pressable
+          onPress={() => onToggleFavorite(id)}
+          style={styles.iconButton}
+        >
+          <Ionicons
+            name={favorite ? "heart" : "heart-outline"}
+            size={18}
+            color={favorite ? "#ff4d4d" : "white"}
+          />
+        </Pressable>
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 5,
-  },
-  input: {
-    color: "#fff",
-    flex: 1,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-  },
-  inputIcon: {
-    marginRight: 6,
-  },
   card: {
-    backgroundColor: "#222020",
-    padding: 15,
-    borderRadius: 5,
-    marginTop: 10,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  cardTitle: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  cardText: {
-    color: "#b5a5a5",
-    fontSize: 14,
-    marginTop: 5,
-  },
-  iconContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 15,
-  },
-  addIcon: {
-    alignSelf: "flex-end",
-    borderWidth: 1,
-    borderColor: "#fff",
-    borderRadius: 13,
-    padding: 3,
-  },
-  deleteIcon: {
-    backgroundColor: "#D11A2A",
-    padding: 4,
+    flex: 1 / 3,
+    aspectRatio: 2 / 3,
+    margin: 3,
     borderRadius: 6,
+    overflow: "hidden",
+    backgroundColor: "#1a1a1a",
+  },
+  cardPressed: {
+    opacity: 0.75,
+  },
+  poster: {
+    width: "100%",
+    height: "100%",
+  },
+  overlay: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    gap: 6,
+    alignItems: "center",
+  },
+  iconButton: {
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 12,
+    padding: 4,
+  },
+  deleteButton: {
+    backgroundColor: "#D11A2A",
+    borderRadius: 6,
+    padding: 4,
     alignItems: "center",
     justifyContent: "center",
   },
