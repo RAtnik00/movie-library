@@ -3,7 +3,7 @@ import SearchBar from "@/components/search-bar";
 import { useMovies } from "@/context/movie-context";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, FlatList } from "react-native";
+import { Alert, FlatList, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ListScreen() {
@@ -16,12 +16,14 @@ export default function ListScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 12 }}>
+    <SafeAreaView style={styles.container}>
       <SearchBar value={searchQuery} onChange={setSearchQuery} />
 
       <FlatList
         data={filteredMovies}
         keyExtractor={(item) => item.id}
+        numColumns={3}
+        columnWrapperStyle={styles.row}
         renderItem={({ item }) => (
           <MovieCard
             {...item}
@@ -48,3 +50,13 @@ export default function ListScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 12,
+  },
+  row: {
+    justifyContent: "flex-start",
+  },
+});
