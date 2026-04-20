@@ -28,8 +28,5 @@ class LogoutRequest(BaseModel):
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
-class AddFavoriteRequest(BaseModel):
-    tmdb_id: int
-
-class AddWatchlistRequest(BaseModel):
+class MovieActionRequest(BaseModel):
     tmdb_id: int

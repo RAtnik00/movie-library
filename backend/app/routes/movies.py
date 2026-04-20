@@ -4,9 +4,11 @@ from app.dependencies.movies import get_movies_api_client
 from app.services.movies_api import MoviesAPIClient
 from app.services.watchlist_service import add_to_watchlist, get_user_watchlist, remove_from_watchlist
 from app.services.favorite_service import add_to_favorites, get_user_favorites, remove_from_favorites
+from app.services.watched_service import add_to_watched, get_user_watched, remove_from_watched
+
 from app.database import get_db
 from app.core.security import get_current_user
-from app.schemas.user import AddFavoriteRequest, AddWatchlistRequest
+from app.schemas.user import MovieActionRequest
 from app.models.user import User
 
 from sqlalchemy.orm import Session
@@ -27,7 +29,7 @@ def get_movie(movie_id: int, client: MoviesAPIClient = Depends(get_movies_api_cl
 
 @router.post("/favorites")
 def add_favorites(
-        body: AddFavoriteRequest,
+        body: MovieActionRequest,
         db: Session = Depends(get_db),
         client: MoviesAPIClient = Depends(get_movies_api_client),
         current_user: User = Depends(get_current_user)
@@ -53,7 +55,7 @@ def delete_favorites(
 
 @router.post("/watchlist")
 def add_watchlist(
-        body: AddWatchlistRequest,
+        body: MovieActionRequest,
         db: Session = Depends(get_db),
         client: MoviesAPIClient = Depends(get_movies_api_client),
         current_user: User = Depends(get_current_user)
@@ -76,3 +78,29 @@ def delete_watchlist(
         raise HTTPException(status_code=404, detail="Watchlist not found")
 
     return watchlist
+
+@router.post("/watched")
+def add_watched(
+        body: MovieActionRequest,
+        db: Session = Depends(get_db),
+        client: MoviesAPIClient = Depends(get_movies_api_client),
+        current_user: User = Depends(get_current_user)
+):
+    return add_to_watched(db, current_user, body.tmdb_id, client)
+
+@router.get("/watched")
+def get_watched(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return get_user_watched(db, current_user)
+
+@router.delete("/watched/{tmdb_id}")
+def delete_watched(
+        tmdb_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+):
+    watched = remove_from_watched(db, current_user, tmdb_id)
+
+    if watched is None:
+        raise HTTPException(status_code=404, detail="Watched movie not found")
+
+    return watched

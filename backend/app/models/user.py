@@ -15,3 +15,4 @@ class User(Base):
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
     favorites = relationship("Favorite", back_populates="user")
     watchlist = relationship("Watchlist", back_populates="user")
+    watched = relationship("Watched", back_populates="user")
