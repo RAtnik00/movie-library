@@ -27,3 +27,6 @@ class LogoutRequest(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
+
+class MovieActionRequest(BaseModel):
+    tmdb_id: int

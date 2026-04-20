@@ -43,5 +43,4 @@ app-example
 /android
 
 # IntelliJ
-.idea/
-*.xml
+/**/.idea/*

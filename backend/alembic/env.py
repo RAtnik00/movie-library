@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 
 from app.database import Base
+from app.models.movie import Movie
+from app.models.watchlist import Watchlist
+from app.models.watched import Watched
+from app.models.favorite import Favorite
 from app.models.user import User
 from app.models.refresh_token import RefreshToken
 
