@@ -3,7 +3,6 @@ import { Image, Pressable, StyleSheet, View } from "react-native";
 import { Movie } from "./types/movie";
 
 interface MovieCardProps extends Movie {
-  onDelete: (id: string) => void;
   onToggleFavorite: (id: string) => void;
   onPress: () => void;
 }
@@ -66,7 +65,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   iconButton: {
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "#00000080",
     borderRadius: 12,
     padding: 4,
   },

@@ -6,6 +6,7 @@ const initialMovies: Movie[] = [
     id: "1",
     title: "The Shawshank Redemption",
     director: "Frank Darabont",
+    release_date: "1984",
     score: 8.6,
     favorite: false,
     poster: "https://cdng.europosters.eu/pod_public/1300/262807.jpg",
@@ -15,6 +16,7 @@ const initialMovies: Movie[] = [
     id: "2",
     title: "The Godfather",
     director: "Francis Ford Coppola",
+    release_date: "1997",
     score: 9.2,
     favorite: false,
     poster: "https://cdng.europosters.eu/pod_public/1300/262788.jpg",
@@ -24,6 +26,7 @@ const initialMovies: Movie[] = [
     id: "3",
     title: "Scary Movie",
     director: "Keenen Ivory Wayans",
+    release_date: "2001",
     score: 7.0,
     favorite: true,
     poster:
