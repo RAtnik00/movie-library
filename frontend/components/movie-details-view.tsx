@@ -1,5 +1,6 @@
 import { Movie } from "@/components/types/movie";
 import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import {
   Image,
   Pressable,
@@ -8,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import EllipsisMenu from "./elipsis-menu";
 
 interface Props {
   movie: Movie;
@@ -22,6 +24,8 @@ export default function MovieDetailsView({
   onToggleFavorite,
   onBack,
 }: Props) {
+  const [menuVisible, setMenuVisible] = useState(false);
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -44,16 +48,43 @@ export default function MovieDetailsView({
           >
             <Ionicons name="trash" size={18} color="white" />
           </Pressable>
+          <Pressable onPress={() => setMenuVisible(true)}>
+            <Ionicons name="ellipsis-vertical" size={22} color="white" />
+          </Pressable>
         </View>
       </View>
 
-      <Image source={{ uri: movie.poster }} style={styles.poster} />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "space-between",
+          flexDirection: "row",
+        }}
+      >
+        <View style={{ maxWidth: 200 }}>
+          <Text style={styles.title}>{movie.title}</Text>
+          <Text style={styles.meta}>
+            {movie.release_date} <Text>•</Text> DIRECTED BY
+          </Text>
+          <Text style={styles.dir}>{movie.director}</Text>
+          <Text style={styles.score}>⭐ {movie.score}</Text>
+        </View>
 
-      <Text style={styles.title}>{movie.title}</Text>
-      <Text style={styles.meta}>Directed by {movie.director}</Text>
-      <Text style={styles.score}>⭐ {movie.score}</Text>
+        <Image
+          source={{ uri: movie.poster }}
+          style={styles.poster}
+          resizeMode="contain"
+        />
+      </View>
 
       <Text style={styles.desc}>{movie.desc}</Text>
+      <EllipsisMenu
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+        isFavorite={movie.favorite}
+        onToggleFavorite={() => onToggleFavorite(movie.id)}
+        onDelete={() => onDelete(movie.id)}
+      />
     </ScrollView>
   );
 }
@@ -77,8 +108,8 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   poster: {
-    width: "100%",
-    height: 400,
+    width: 120,
+    aspectRatio: 2 / 3,
     borderRadius: 12,
   },
   title: {
@@ -90,6 +121,11 @@ const styles = StyleSheet.create({
   meta: {
     color: "#aaa",
     marginTop: 5,
+  },
+  dir: {
+    color: "#aaa",
+    fontWeight: "bold",
+    fontSize: 16,
   },
   score: {
     color: "#e6b800",

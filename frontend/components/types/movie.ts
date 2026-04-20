@@ -6,4 +6,5 @@ export type Movie = {
   favorite: boolean;
   poster: string;
   desc: string;
+  release_date: string;
 };
