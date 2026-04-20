@@ -8,6 +8,7 @@ from app.models.movie import Movie
 from app.models.favorite import Favorite
 from app.models.user import User
 from app.models.refresh_token import RefreshToken
+from app.models.watchlist import Watchlist
 
 app = FastAPI()
 

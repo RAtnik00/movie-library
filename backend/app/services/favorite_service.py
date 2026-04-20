@@ -43,7 +43,7 @@ def get_or_create_movie(
     db.refresh(movie)
     return movie
 
-def add_to_favorites(db: Session, user, tmdb_id: int, client: MoviesAPIClient):
+def add_to_favorites(db: Session, user: User, tmdb_id: int, client: MoviesAPIClient):
     movie = get_or_create_movie(db, client, tmdb_id)
 
     stmt = select(Favorite).where(

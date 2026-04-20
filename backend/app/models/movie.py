@@ -14,3 +14,4 @@ class Movie(Base):
     release_date = Column(Date)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     favorites = relationship("Favorite", back_populates="movie")
+    watchlist = relationship("Watchlist", back_populates="movie")

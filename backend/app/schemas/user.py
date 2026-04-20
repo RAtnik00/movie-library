@@ -30,3 +30,6 @@ class RefreshTokenRequest(BaseModel):
 
 class AddFavoriteRequest(BaseModel):
     tmdb_id: int
+
+class AddWatchlistRequest(BaseModel):
+    tmdb_id: int

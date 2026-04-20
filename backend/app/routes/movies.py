@@ -2,10 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.dependencies.movies import get_movies_api_client
 from app.services.movies_api import MoviesAPIClient
+from app.services.watchlist_service import add_to_watchlist, get_user_watchlist, remove_from_watchlist
+from app.services.favorite_service import add_to_favorites, get_user_favorites, remove_from_favorites
 from app.database import get_db
 from app.core.security import get_current_user
-from app.schemas.user import AddFavoriteRequest
-from app.services.favorite_service import add_to_favorites, get_user_favorites, remove_from_favorites
+from app.schemas.user import AddFavoriteRequest, AddWatchlistRequest
 from app.models.user import User
 
 from sqlalchemy.orm import Session
@@ -49,3 +50,29 @@ def delete_favorites(
         raise HTTPException(status_code=404, detail="Favorite not found")
 
     return favorite
+
+@router.post("/watchlist")
+def add_watchlist(
+        body: AddWatchlistRequest,
+        db: Session = Depends(get_db),
+        client: MoviesAPIClient = Depends(get_movies_api_client),
+        current_user: User = Depends(get_current_user)
+):
+    return add_to_watchlist(db, current_user, body.tmdb_id, client)
+
+@router.get("/watchlist")
+def get_watchlist(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return get_user_watchlist(db, current_user)
+
+@router.delete("/watchlist/{tmdb_id}")
+def delete_watchlist(
+        tmdb_id: int,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+):
+    watchlist = remove_from_watchlist(db, current_user, tmdb_id)
+
+    if watchlist is None:
+        raise HTTPException(status_code=404, detail="Watchlist not found")
+
+    return watchlist
