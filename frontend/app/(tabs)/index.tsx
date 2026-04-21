@@ -1,62 +1,105 @@
-import React from "react";
-import { Image, Pressable, Text, TextInput, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Image, StyleSheet, Text, View } from "react-native";
 
-export default function VerstkaLogin() {
+export default function ProfileCard() {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        padding: 20,
-      }}
-    >
-      <View style={{ alignItems: "center", marginBottom: 30 }}>
-        <Image
-          source={{
-            uri: "https://i.guim.co.uk/img/media/327aa3f0c3b8e40ab03b4ae80319064e401c6fbc/377_133_3542_2834/master/3542.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=34d32522f47e4a67286f9894fc81c863",
-          }}
-          style={{ width: 200, height: 200, borderRadius: 100 }}
-        />
-        <Text style={{ color: "white", fontSize: 24, marginTop: 10 }}>
-          Please Log in
-        </Text>
+    <View style={styles.screen}>
+      <Ionicons
+        name="settings-outline"
+        size={30}
+        style={styles.settingIcon}
+      ></Ionicons>
+      <View style={styles.container}>
+        <View style={styles.avatarWrapper}>
+          <Image
+            source={{
+              uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJ9Db5WtT-GdWS_C4be_YNL_Oc9FCbWL6tVw&s",
+            }}
+            style={styles.avatar}
+          />
+        </View>
+
+        <Text style={styles.name}>Super_Cutie</Text>
+
+        <View style={styles.statsRow}>
+          {[
+            { label: "Rated films", value: "351" },
+            { label: "Favorite", value: "24" },
+            { label: "Lists", value: "16" },
+          ].map((stat, i, arr) => (
+            <View
+              key={stat.label}
+              style={[styles.statItem, i < arr.length - 1 && styles.statBorder]}
+            >
+              <Text style={styles.statValue}>{stat.value}</Text>
+              <Text style={styles.statLabel}>{stat.label}</Text>
+            </View>
+          ))}
+        </View>
       </View>
-
-      <TextInput
-        style={{
-          backgroundColor: "#222020",
-          color: "white",
-          padding: 10,
-          borderRadius: 5,
-          marginBottom: 15,
-        }}
-        placeholder="Username"
-        placeholderTextColor="#b5a5a5"
-      />
-
-      <TextInput
-        style={{
-          backgroundColor: "#222020",
-          color: "white",
-          padding: 10,
-          borderRadius: 5,
-          marginBottom: 20,
-        }}
-        placeholder="Password"
-        placeholderTextColor="#b5a5a5"
-        secureTextEntry={true}
-      />
-
-      <Pressable
-        style={{
-          backgroundColor: "green",
-          padding: 15,
-          borderRadius: 5,
-          alignItems: "center",
-        }}
-      >
-        <Text style={{ color: "white", fontSize: 16 }}>Login</Text>
-      </Pressable>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: "#1b1d1f",
+    padding: 20,
+    paddingTop: 60,
+  },
+  container: {
+    width: "100%",
+    alignItems: "center",
+  },
+  avatarWrapper: {
+    marginBottom: 16,
+  },
+  avatar: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+  },
+  name: {
+    color: "#f1f0ff",
+    fontSize: 24,
+    fontWeight: "700",
+    letterSpacing: -0.3,
+    marginBottom: 4,
+  },
+  statsRow: {
+    flexDirection: "row",
+    backgroundColor: "#25282b",
+    borderRadius: 14,
+    width: "100%",
+    marginBottom: 20,
+    overflow: "hidden",
+  },
+  statItem: {
+    flex: 1,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  statBorder: {
+    borderRightWidth: 0.5,
+    borderRightColor: "#3a3d42",
+  },
+  statValue: {
+    color: "#f1f0ff",
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  statLabel: {
+    color: "#6b7280",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  settingIcon: {
+    position: "absolute",
+    color: "#6b7280",
+    top: 40,
+    right: 20,
+  },
+});

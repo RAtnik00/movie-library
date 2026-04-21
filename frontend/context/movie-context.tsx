@@ -33,6 +33,50 @@ const initialMovies: Movie[] = [
       "https://m.media-amazon.com/images/I/71EWBeJ+imL._AC_UF894,1000_QL80_.jpg",
     desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam tincidunt sed ligula rutrum molestie. Praesent et interdum orci. Phasellus sed ligula pharetra, aliquet mi non, dictum nisi. Fusce efficitur iaculis ex, malesuada sollicitudin lorem congue sit amet. Phasellus urna dui, euismod vitae lacus non, pharetra rutrum massa.",
   },
+  {
+    id: "4",
+    title: "The Dark Knight",
+    director: "Christopher Nolan",
+    release_date: "2008",
+    score: 9.1,
+    favorite: false,
+    poster:
+      "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_FMjpg_UX1000_.jpg",
+    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam tincidunt sed ligula rutrum molestie. Praesent et interdum orci. Phasellus sed ligula pharetra, aliquet mi non, dictum nisi. Fusce efficitur iaculis ex, malesuada sollicitudin lorem congue sit amet. Phasellus urna dui, euismod vitae lacus non, pharetra rutrum massa.",
+  },
+  {
+    id: "5",
+    title: "12 Angry Men",
+    director: "Sidney Lumet",
+    release_date: "1957",
+    score: 9.3,
+    favorite: true,
+    poster:
+      "https://m.media-amazon.com/images/M/MV5BYjE4NzdmOTYtYjc5Yi00YzBiLWEzNDEtNTgxZGQ2MWVkN2NiXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam tincidunt sed ligula rutrum molestie. Praesent et interdum orci. Phasellus sed ligula pharetra, aliquet mi non, dictum nisi. Fusce efficitur iaculis ex, malesuada sollicitudin lorem congue sit amet. Phasellus urna dui, euismod vitae lacus non, pharetra rutrum massa.",
+  },
+  {
+    id: "6",
+    title: "The Good, the Bad and the Ugly",
+    director: "Sergio Leone",
+    release_date: "1966",
+    score: 8.8,
+    favorite: false,
+    poster:
+      "https://media.posterlounge.com/img/products/350000/347248/347248_poster.jpg",
+    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam tincidunt sed ligula rutrum molestie. Praesent et interdum orci. Phasellus sed ligula pharetra, aliquet mi non, dictum nisi. Fusce efficitur iaculis ex, malesuada sollicitudin lorem congue sit amet. Phasellus urna dui, euismod vitae lacus non, pharetra rutrum massa.",
+  },
+  {
+    id: "7",
+    title: "Green Mile",
+    director: "Frank Darabont",
+    release_date: "1999",
+    score: 8.6,
+    favorite: false,
+    poster:
+      "https://m.media-amazon.com/images/I/51mvJdnlXrL._AC_UF894,1000_QL80_.jpg",
+    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam tincidunt sed ligula rutrum molestie. Praesent et interdum orci. Phasellus sed ligula pharetra, aliquet mi non, dictum nisi. Fusce efficitur iaculis ex, malesuada sollicitudin lorem congue sit amet. Phasellus urna dui, euismod vitae lacus non, pharetra rutrum massa.",
+  },
 ];
 
 interface MoviesContextType {
