@@ -54,3 +54,24 @@ def remove_from_watched(db: Session, user: User, tmdb_id: int) -> Watched | None
     db.delete(watched)
     db.commit()
     return watched
+
+def set_watched_rating(db: Session, user: User, tmdb_id: int, rating: int) -> Watched:
+    movie = get_movie_by_tmdb_id(db, tmdb_id)
+    if movie is None:
+        return None
+
+    stmt = select(Watched).where(
+        Watched.user_id == user.id,
+        Watched.movie_id == movie.id,
+    )
+    result = db.execute(stmt)
+    watched = result.scalar_one_or_none()
+
+    if watched is None:
+        return None
+
+    watched.rating = rating
+
+    db.commit()
+    db.refresh(watched)
+    return watched

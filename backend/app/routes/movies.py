@@ -4,11 +4,11 @@ from app.dependencies.movies import get_movies_api_client
 from app.services.movies_api import MoviesAPIClient
 from app.services.watchlist_service import add_to_watchlist, get_user_watchlist, remove_from_watchlist
 from app.services.favorite_service import add_to_favorites, get_user_favorites, remove_from_favorites
-from app.services.watched_service import add_to_watched, get_user_watched, remove_from_watched
+from app.services.watched_service import add_to_watched, get_user_watched, remove_from_watched, set_watched_rating
 
 from app.database import get_db
 from app.core.security import get_current_user
-from app.schemas.user import MovieActionRequest
+from app.schemas.user import MovieActionRequest, SetWatchedRatingRequest, WatchedResponse
 from app.models.user import User
 
 from sqlalchemy.orm import Session
@@ -88,7 +88,7 @@ def add_watched(
 ):
     return add_to_watched(db, current_user, body.tmdb_id, client)
 
-@router.get("/watched")
+@router.get("/watched", response_model=list[WatchedResponse])
 def get_watched(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return get_user_watched(db, current_user)
 
@@ -99,6 +99,20 @@ def delete_watched(
         current_user: User = Depends(get_current_user),
 ):
     watched = remove_from_watched(db, current_user, tmdb_id)
+
+    if watched is None:
+        raise HTTPException(status_code=404, detail="Watched movie not found")
+
+    return watched
+
+@router.patch("/watched/{tmdb_id}/rating")
+def update_watched_rating(
+        tmdb_id: int,
+        body: SetWatchedRatingRequest,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+):
+    watched = set_watched_rating(db, current_user, tmdb_id, body.rating)
 
     if watched is None:
         raise HTTPException(status_code=404, detail="Watched movie not found")
