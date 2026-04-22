@@ -13,3 +13,4 @@ class Watched(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     user = relationship("User", back_populates="watched")
     movie = relationship("Movie", back_populates="watched")
+    rating = Column(Integer, nullable=True)
