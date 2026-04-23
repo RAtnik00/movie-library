@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException
-from sqlalchemy import select, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -15,22 +14,22 @@ from app.core.security import (
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
 from app.schemas.user import RegisterRequest, RegisterResponse, LoginResponse
+from app.repositories.user_repository import UserRepository
+from app.repositories.refresh_token_repository import RefreshTokenRepository
 
 
 class AuthService:
     def __init__(self, db: Session):
         self.db = db
+        self.user_repository = UserRepository(db)
+        self.refresh_token_repository = RefreshTokenRepository(db)
 
     def register(self, body: RegisterRequest) -> RegisterResponse:
-        stmt = select(User).where(User.username == body.username)
-        result = self.db.execute(stmt)
-        existing_username = result.scalar_one_or_none()
+        existing_username = self.user_repository.get_by_username(body.username)
         if existing_username is not None:
             raise HTTPException(status_code=400, detail="Username already exists")
 
-        stmt = select(User).where(User.email == body.email)
-        result = self.db.execute(stmt)
-        existing_email = result.scalar_one_or_none()
+        existing_email = self.user_repository.get_by_email(body.email)
         if existing_email is not None:
             raise HTTPException(status_code=400, detail="Email already exists")
 
@@ -42,7 +41,7 @@ class AuthService:
         )
 
         try:
-            self.db.add(user)
+            self.user_repository.add(user)
             self.db.commit()
             self.db.refresh(user)
         except IntegrityError:
@@ -57,11 +56,7 @@ class AuthService:
         )
 
     def login(self, username_or_email: str, password: str) -> LoginResponse:
-        stmt = select(User).where(
-            or_(User.username == username_or_email, User.email == username_or_email)
-        )
-        result = self.db.execute(stmt)
-        user = result.scalar_one_or_none()
+        user = self.user_repository.get_by_username_or_email(username_or_email)
 
         if user is None:
             raise HTTPException(status_code=400, detail="Invalid credentials")
@@ -81,7 +76,7 @@ class AuthService:
             expires_at=expires_at,
         )
 
-        self.db.add(new_token_entry)
+        self.refresh_token_repository.add(new_token_entry)
         self.db.commit()
 
         return LoginResponse(
@@ -92,9 +87,7 @@ class AuthService:
 
     def logout(self, refresh_token: str) -> dict:
         token_hash = hash_token(refresh_token)
-        stmt = select(RefreshToken).where(RefreshToken.token_hash == token_hash)
-        result = self.db.execute(stmt)
-        token_entry = result.scalar_one_or_none()
+        token_entry = self.refresh_token_repository.get_by_token_hash(token_hash)
 
         if token_entry is None:
             raise HTTPException(status_code=401, detail="Invalid refresh token")
@@ -109,9 +102,7 @@ class AuthService:
 
     def refresh(self, refresh_token: str) -> dict:
         token_hash = hash_token(refresh_token)
-
-        stmt = select(RefreshToken).where(RefreshToken.token_hash == token_hash)
-        token_entry = self.db.execute(stmt).scalar_one_or_none()
+        token_entry = self.refresh_token_repository.get_by_token_hash(token_hash)
 
         if token_entry is None:
             raise HTTPException(status_code=401, detail="Invalid refresh token")
