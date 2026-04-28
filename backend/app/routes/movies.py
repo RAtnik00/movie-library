@@ -9,7 +9,7 @@ from app.services.watched_service import WatchedService
 
 from app.database import get_db
 from app.core.security import get_current_user
-from app.schemas.user import MovieActionRequest, SetWatchedRatingRequest, WatchedResponse
+from app.schemas.movie import MovieActionRequest, SetWatchedRatingRequest, WatchedResponse
 from app.models.user import User
 
 from sqlalchemy.orm import Session

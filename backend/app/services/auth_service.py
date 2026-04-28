@@ -13,7 +13,7 @@ from app.core.security import (
 )
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
-from app.schemas.user import RegisterRequest, RegisterResponse, LoginResponse
+from app.schemas.auth import RegisterRequest, RegisterResponse, LoginResponse
 from app.repositories.user_repository import UserRepository
 from app.repositories.refresh_token_repository import RefreshTokenRepository
 
@@ -119,4 +119,3 @@ class AuthService:
             "access_token": access_token,
             "token_type": "bearer",
         }
-
