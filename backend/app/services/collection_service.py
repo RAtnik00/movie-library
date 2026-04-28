@@ -1,9 +1,17 @@
+from typing import TypeVar
+
 from sqlalchemy.orm import Session
 
+from app.models.favorite import Favorite
 from app.models.user import User
+from app.models.watched import Watched
+from app.models.watchlist import Watchlist
 from app.repositories.collection_repository import CollectionRepository
 from app.services.movie_service import MovieService
 from app.services.movies_api import MoviesAPIClient
+
+
+CollectionModel = TypeVar("CollectionModel", Favorite, Watchlist, Watched)
 
 
 class MovieCollectionService:
@@ -12,7 +20,13 @@ class MovieCollectionService:
         self.movie_service = MovieService(db)
         self.collection_repository = CollectionRepository(db)
 
-    def add(self, model, user: User, tmdb_id: int, client: MoviesAPIClient):
+    def add(
+        self,
+        model: type[CollectionModel],
+        user: User,
+        tmdb_id: int,
+        client: MoviesAPIClient,
+    ) -> CollectionModel:
         movie = self.movie_service.get_or_create_movie(client, tmdb_id)
 
         obj = self.collection_repository.get(model, user.id, movie.id)
@@ -29,17 +43,31 @@ class MovieCollectionService:
         self.db.refresh(obj)
         return obj
 
-    def get_all(self, model, user: User):
+    def get_all(
+        self,
+        model: type[CollectionModel],
+        user: User,
+    ) -> list[CollectionModel]:
         return self.collection_repository.get_all(model, user.id)
 
-    def get_one(self, model, user: User, tmdb_id: int):
+    def get_one(
+        self,
+        model: type[CollectionModel],
+        user: User,
+        tmdb_id: int,
+    ) -> CollectionModel | None:
         movie = self.movie_service.get_movie_by_tmdb_id(tmdb_id)
         if movie is None:
             return None
 
         return self.collection_repository.get(model, user.id, movie.id)
 
-    def remove(self, model, user: User, tmdb_id: int):
+    def remove(
+        self,
+        model: type[CollectionModel],
+        user: User,
+        tmdb_id: int,
+    ) -> CollectionModel | None:
         obj = self.get_one(model, user, tmdb_id)
         if obj is None:
             return None
