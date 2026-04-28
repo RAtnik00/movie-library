@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.routes.health import router as health_router
 from app.routes.auth import router as auth_router
 from app.routes.movies import router as movies_router
+from app.routes.favorites import router as favorites_router
 
 from app.models.movie import Movie
 from app.models.favorite import Favorite
@@ -16,3 +17,4 @@ app = FastAPI()
 app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(movies_router, prefix="/api")
+app.include_router(favorites_router, prefix="/api")
