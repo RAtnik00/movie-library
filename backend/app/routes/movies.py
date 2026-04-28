@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.dependencies.movies import get_movies_api_client
 from app.services.movies_api import MoviesAPIClient
-from app.services.watchlist_service import add_to_watchlist, get_user_watchlist, remove_from_watchlist
-from app.services.favorite_service import add_to_favorites, get_user_favorites, remove_from_favorites
-from app.services.watched_service import add_to_watched, get_user_watched, remove_from_watched, set_watched_rating
+from app.services.watchlist_service import WatchlistService
+from app.services.favorite_service import FavoriteService
+from app.services.watched_service import WatchedService
 
 from app.database import get_db
 from app.core.security import get_current_user
@@ -34,11 +34,13 @@ def add_favorites(
         client: MoviesAPIClient = Depends(get_movies_api_client),
         current_user: User = Depends(get_current_user)
 ):
-    return add_to_favorites(db, current_user, body.tmdb_id, client)
+    service = FavoriteService(db)
+    return service.add(current_user, body.tmdb_id, client)
 
 @router.get("/favorites")
 def get_favorites(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return get_user_favorites(db, current_user)
+    service = FavoriteService(db)
+    return service.get_all(current_user)
 
 @router.delete("/favorites/{tmdb_id}")
 def delete_favorites(
@@ -46,7 +48,8 @@ def delete_favorites(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
 ):
-    favorite = remove_from_favorites(db, current_user, tmdb_id)
+    service = FavoriteService(db)
+    favorite = service.remove(current_user, tmdb_id)
 
     if favorite is None:
         raise HTTPException(status_code=404, detail="Favorite not found")
@@ -60,11 +63,13 @@ def add_watchlist(
         client: MoviesAPIClient = Depends(get_movies_api_client),
         current_user: User = Depends(get_current_user)
 ):
-    return add_to_watchlist(db, current_user, body.tmdb_id, client)
+    service = WatchlistService(db)
+    return service.add(current_user, body.tmdb_id, client)
 
 @router.get("/watchlist")
 def get_watchlist(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return get_user_watchlist(db, current_user)
+    service = WatchlistService(db)
+    return service.get_all(current_user)
 
 @router.delete("/watchlist/{tmdb_id}")
 def delete_watchlist(
@@ -72,7 +77,8 @@ def delete_watchlist(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
 ):
-    watchlist = remove_from_watchlist(db, current_user, tmdb_id)
+    service = WatchlistService(db)
+    watchlist = service.remove(current_user, tmdb_id)
 
     if watchlist is None:
         raise HTTPException(status_code=404, detail="Watchlist not found")
@@ -86,11 +92,13 @@ def add_watched(
         client: MoviesAPIClient = Depends(get_movies_api_client),
         current_user: User = Depends(get_current_user)
 ):
-    return add_to_watched(db, current_user, body.tmdb_id, client)
+    service = WatchedService(db)
+    return service.add(current_user, body.tmdb_id, client)
 
 @router.get("/watched", response_model=list[WatchedResponse])
 def get_watched(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return get_user_watched(db, current_user)
+    service = WatchedService(db)
+    return service.get_all(current_user)
 
 @router.delete("/watched/{tmdb_id}")
 def delete_watched(
@@ -98,7 +106,8 @@ def delete_watched(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
 ):
-    watched = remove_from_watched(db, current_user, tmdb_id)
+    service = WatchedService(db)
+    watched = service.remove(current_user, tmdb_id)
 
     if watched is None:
         raise HTTPException(status_code=404, detail="Watched movie not found")
@@ -112,7 +121,8 @@ def update_watched_rating(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user),
 ):
-    watched = set_watched_rating(db, current_user, tmdb_id, body.rating)
+    service = WatchedService(db)
+    watched = service.set_rating(current_user, tmdb_id, body.rating)
 
     if watched is None:
         raise HTTPException(status_code=404, detail="Watched movie not found")
