@@ -9,59 +9,72 @@ from app.services.watched_service import WatchedService
 
 from app.database import get_db
 from app.core.security import get_current_user
-from app.schemas.movie import MovieActionRequest, SetWatchedRatingRequest, WatchedResponse
+from app.schemas.movie import (
+    MovieActionRequest,
+    SetWatchedRatingRequest,
+    WatchedResponse,
+)
 from app.models.user import User
 
 from sqlalchemy.orm import Session
 
 router = APIRouter()
 
+
 @router.get("/movies")
 def get_movies(
-        db: Session = Depends(get_db),
-        client: MoviesAPIClient = Depends(get_movies_api_client),
+    db: Session = Depends(get_db),
+    client: MoviesAPIClient = Depends(get_movies_api_client),
 ):
     service = MovieService(db)
     return service.get_popular_movies(client)
 
+
 @router.get("/movies/search")
 def get_search(
-        query: str,
-        db: Session = Depends(get_db),
-        client: MoviesAPIClient = Depends(get_movies_api_client),
+    query: str,
+    db: Session = Depends(get_db),
+    client: MoviesAPIClient = Depends(get_movies_api_client),
 ):
     service = MovieService(db)
     return service.search_movies(client, query)
 
+
 @router.get("/movies/{movie_id}")
 def get_movie(
-        movie_id: int,
-        db: Session = Depends(get_db),
-        client: MoviesAPIClient = Depends(get_movies_api_client),
+    movie_id: int,
+    db: Session = Depends(get_db),
+    client: MoviesAPIClient = Depends(get_movies_api_client),
 ):
     service = MovieService(db)
     return service.get_movie_details(client, movie_id)
 
+
 @router.post("/favorites")
 def add_favorites(
-        body: MovieActionRequest,
-        db: Session = Depends(get_db),
-        client: MoviesAPIClient = Depends(get_movies_api_client),
-        current_user: User = Depends(get_current_user)
+    body: MovieActionRequest,
+    db: Session = Depends(get_db),
+    client: MoviesAPIClient = Depends(get_movies_api_client),
+    current_user: User = Depends(get_current_user),
 ):
     service = FavoriteService(db)
     return service.add(current_user, body.tmdb_id, client)
 
+
 @router.get("/favorites")
-def get_favorites(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_favorites(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     service = FavoriteService(db)
     return service.get_all(current_user)
 
+
 @router.delete("/favorites/{tmdb_id}")
 def delete_favorites(
-        tmdb_id: int,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user),
+    tmdb_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     service = FavoriteService(db)
     favorite = service.remove(current_user, tmdb_id)
@@ -71,26 +84,32 @@ def delete_favorites(
 
     return favorite
 
+
 @router.post("/watchlist")
 def add_watchlist(
-        body: MovieActionRequest,
-        db: Session = Depends(get_db),
-        client: MoviesAPIClient = Depends(get_movies_api_client),
-        current_user: User = Depends(get_current_user)
+    body: MovieActionRequest,
+    db: Session = Depends(get_db),
+    client: MoviesAPIClient = Depends(get_movies_api_client),
+    current_user: User = Depends(get_current_user),
 ):
     service = WatchlistService(db)
     return service.add(current_user, body.tmdb_id, client)
 
+
 @router.get("/watchlist")
-def get_watchlist(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_watchlist(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     service = WatchlistService(db)
     return service.get_all(current_user)
 
+
 @router.delete("/watchlist/{tmdb_id}")
 def delete_watchlist(
-        tmdb_id: int,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user),
+    tmdb_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     service = WatchlistService(db)
     watchlist = service.remove(current_user, tmdb_id)
@@ -100,26 +119,32 @@ def delete_watchlist(
 
     return watchlist
 
+
 @router.post("/watched")
 def add_watched(
-        body: MovieActionRequest,
-        db: Session = Depends(get_db),
-        client: MoviesAPIClient = Depends(get_movies_api_client),
-        current_user: User = Depends(get_current_user)
+    body: MovieActionRequest,
+    db: Session = Depends(get_db),
+    client: MoviesAPIClient = Depends(get_movies_api_client),
+    current_user: User = Depends(get_current_user),
 ):
     service = WatchedService(db)
     return service.add(current_user, body.tmdb_id, client)
 
+
 @router.get("/watched", response_model=list[WatchedResponse])
-def get_watched(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_watched(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     service = WatchedService(db)
     return service.get_all(current_user)
 
+
 @router.delete("/watched/{tmdb_id}")
 def delete_watched(
-        tmdb_id: int,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user),
+    tmdb_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     service = WatchedService(db)
     watched = service.remove(current_user, tmdb_id)
@@ -129,12 +154,13 @@ def delete_watched(
 
     return watched
 
+
 @router.patch("/watched/{tmdb_id}/rating")
 def update_watched_rating(
-        tmdb_id: int,
-        body: SetWatchedRatingRequest,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user),
+    tmdb_id: int,
+    body: SetWatchedRatingRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     service = WatchedService(db)
     watched = service.set_rating(current_user, tmdb_id, body.rating)
