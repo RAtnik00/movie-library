@@ -7,7 +7,7 @@ class MovieActionRequest(BaseModel):
     tmdb_id: int
 
 
-class WatchedMovieInfo(BaseModel):
+class CollectionMovieInfo(BaseModel):
     id: int
     tmdb_id: int
     title: str
@@ -21,12 +21,23 @@ class SetWatchedRatingRequest(BaseModel):
     rating: int = Field(ge=1, le=10)
 
 
-class WatchedResponse(BaseModel):
+class MovieCollectionResponse(BaseModel):
     id: int
     movie_id: int
-    rating: int | None
     created_at: datetime.datetime
-    movie: WatchedMovieInfo
+    movie: CollectionMovieInfo
 
     class Config:
         from_attributes = True
+
+
+class FavoriteResponse(MovieCollectionResponse):
+    pass
+
+
+class WatchlistResponse(MovieCollectionResponse):
+    pass
+
+
+class WatchedResponse(MovieCollectionResponse):
+    rating: int | None
