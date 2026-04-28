@@ -1,25 +1,25 @@
-from datetime import datetime, timedelta, timezone
-
-from fastapi import HTTPException, Depends
-from jose import jwt, JWTError
-from pwdlib import PasswordHash
-from fastapi.security import OAuth2PasswordBearer
-from starlette import status
-
-from app.database import get_db
-from app.models.user import User
-from app.core.config import settings
-
-from sqlalchemy.orm import Session
-
 import hashlib
 import secrets
+from datetime import datetime, timedelta, timezone
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
+from pwdlib import PasswordHash
+from sqlalchemy.orm import Session
+
+from app.core.config import settings
+from app.database import get_db
+from app.models.user import User
 
 password_hash = PasswordHash.recommended()
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+) -> User:
     user_id = decode_access_token(token)
     user = db.get(User, user_id)
     if user is None:
@@ -48,6 +48,7 @@ def create_access_token(data: dict) -> str:
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
+
 def decode_access_token(token: str) -> int:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -66,10 +67,12 @@ def decode_access_token(token: str) -> int:
             detail="Could not validate credentials",
         )
 
+
 def hash_token(token: str) -> str:
     token_bytes = token.encode("utf-8")
     sha256_hash = hashlib.sha256(token_bytes)
     return sha256_hash.hexdigest()
+
 
 def create_refresh_token() -> str:
     token = secrets.token_urlsafe(settings.REFRESH_TOKEN_EXPIRE_MINUTES)
