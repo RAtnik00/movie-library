@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.core.security import get_current_user
 from app.database import get_db
+from app.dependencies.auth import get_current_user
 from app.dependencies.movies import get_movies_api_client
 from app.models.user import User
-from app.schemas.movie import MovieActionRequest
+from app.schemas.movie import MovieActionRequest, WatchlistResponse
 from app.services.movies_api import MoviesAPIClient
 from app.services.watchlist_service import WatchlistService
 
@@ -13,7 +13,7 @@ from app.services.watchlist_service import WatchlistService
 router = APIRouter(prefix="/watchlist", tags=["watchlist"])
 
 
-@router.post("")
+@router.post("", response_model=WatchlistResponse)
 def add_watchlist(
     body: MovieActionRequest,
     db: Session = Depends(get_db),
@@ -24,7 +24,7 @@ def add_watchlist(
     return service.add(current_user, body.tmdb_id, client)
 
 
-@router.get("")
+@router.get("", response_model=list[WatchlistResponse])
 def get_watchlist(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),

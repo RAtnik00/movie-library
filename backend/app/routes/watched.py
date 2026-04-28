@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.core.security import get_current_user
 from app.database import get_db
+from app.dependencies.auth import get_current_user
 from app.dependencies.movies import get_movies_api_client
 from app.models.user import User
 from app.schemas.movie import (
@@ -17,7 +17,7 @@ from app.services.watched_service import WatchedService
 router = APIRouter(prefix="/watched", tags=["watched"])
 
 
-@router.post("")
+@router.post("", response_model=WatchedResponse)
 def add_watched(
     body: MovieActionRequest,
     db: Session = Depends(get_db),
@@ -52,7 +52,7 @@ def delete_watched(
     return watched
 
 
-@router.patch("/{tmdb_id}/rating")
+@router.patch("/{tmdb_id}/rating", response_model=WatchedResponse)
 def update_watched_rating(
     tmdb_id: int,
     body: SetWatchedRatingRequest,
