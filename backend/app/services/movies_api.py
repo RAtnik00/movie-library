@@ -6,20 +6,22 @@ class MoviesAPIClient:
         self.base_url = base_url
         self.api_key = api_key
 
-    def get_popular(self):
-        url = f"{self.base_url}/movie/popular"
-        params = {"page": 1, "api_key": self.api_key}
-        response = httpx.get(url, params=params)
+    def _get(self, path: str, params: dict | None = None):
+        url = f"{self.base_url}{path}"
+        request_params = {
+            "api_key": self.api_key,
+            **(params or {}),
+        }
+
+        response = httpx.get(url, params=request_params, timeout=10.0)
+        response.raise_for_status()
         return response.json()
+
+    def get_popular(self):
+        return self._get("/movie/popular", {"page": 1})
 
     def get_search(self, query: str):
-        url = f"{self.base_url}/search/movie"
-        params = {"page": 1, "query": query, "api_key": self.api_key}
-        response = httpx.get(url, params=params)
-        return response.json()
+        return self._get("/search/movie", {"page": 1, "query": query})
 
     def get_movie(self, movie_id: int):
-        url = f"{self.base_url}/movie/{movie_id}"
-        params = {"api_key": self.api_key}
-        response = httpx.get(url, params=params)
-        return response.json()
+        return self._get(f"/movie/{movie_id}")
