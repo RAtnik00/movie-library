@@ -1,5 +1,7 @@
 from datetime import date
 
+import httpx
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.movie import Movie
@@ -16,13 +18,22 @@ class MovieService:
         return self.movie_repository.get_by_tmdb_id(tmdb_id)
 
     def get_popular_movies(self, client: MoviesAPIClient):
-        return client.get_popular()
+        try:
+            return client.get_popular()
+        except httpx.HTTPStatusError as error:
+            self._handle_movies_api_error(error)
 
     def search_movies(self, client: MoviesAPIClient, query: str):
-        return client.get_search(query)
+        try:
+            return client.get_search(query)
+        except httpx.HTTPStatusError as error:
+            self._handle_movies_api_error(error)
 
     def get_movie_details(self, client: MoviesAPIClient, movie_id: int):
-        return client.get_movie(movie_id)
+        try:
+            return client.get_movie(movie_id)
+        except httpx.HTTPStatusError as error:
+            self._handle_movies_api_error(error)
 
     def get_or_create_movie(
         self,
@@ -33,7 +44,10 @@ class MovieService:
         if movie:
             return movie
 
-        movie_data = client.get_movie(tmdb_id)
+        try:
+            movie_data = client.get_movie(tmdb_id)
+        except httpx.HTTPStatusError as error:
+            self._handle_movies_api_error(error)
 
         release_date = None
         if movie_data.get("release_date"):
@@ -51,3 +65,14 @@ class MovieService:
         self.db.commit()
         self.db.refresh(movie)
         return movie
+
+    def _handle_movies_api_error(self, error: httpx.HTTPStatusError):
+        status_code = error.response.status_code
+
+        if status_code == 404:
+            raise HTTPException(status_code=404, detail="Movie not found")
+
+        raise HTTPException(
+            status_code=502,
+            detail="Movie provider unavailable",
+        )
