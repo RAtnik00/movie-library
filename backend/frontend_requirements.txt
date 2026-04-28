@@ -1,0 +1,220 @@
+Backend requirements for frontend integration
+============================================
+
+Purpose
+-------
+This file describes what the frontend needs from the backend while integrating
+the movie-library app.
+
+
+Local backend URL
+-----------------
+Default local backend URL:
+
+    http://localhost:8000
+
+Expo / React Native URL notes:
+
+    Web / iOS simulator: http://localhost:8000
+    Android emulator:    http://10.0.2.2:8000
+    Physical phone:      http://<computer-lan-ip>:8000
+
+Frontend can override the backend URL with:
+
+    EXPO_PUBLIC_API_URL=http://<host>:8000
+
+
+Run backend locally
+-------------------
+From the backend folder:
+
+    cd backend
+    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+API docs:
+
+    http://localhost:8000/docs
+
+
+Required backend environment variables
+--------------------------------------
+The backend expects these values in `.env`:
+
+    DB_USER
+    DB_PASSWORD
+    DB_HOST
+    DB_PORT
+    DB_NAME
+    SECRET_KEY
+    TMDB_API_KEY
+
+Optional / defaulted:
+
+    ALGORITHM=HS256
+    ACCESS_TOKEN_EXPIRE_MINUTES=30
+    REFRESH_TOKEN_EXPIRE_MINUTES=10080
+    TMDB_BASE_URL=https://api.themoviedb.org/3
+
+
+CORS
+----
+CORS is enabled in `backend/app/main.py` for local frontend development.
+
+
+Public endpoints
+----------------
+Health check:
+
+    GET /
+
+Popular movies:
+
+    GET /api/movies
+
+Movie search:
+
+    GET /api/movies/search?query=<search-text>
+
+Movie details:
+
+    GET /api/movies/{movie_id}
+
+Movie endpoints currently return TMDB-style responses. For popular/search,
+frontend should read movies from:
+
+    response.results
+
+Poster images use TMDB poster paths. Frontend should build poster URLs as:
+
+    https://image.tmdb.org/t/p/w500{poster_path}
+
+
+Auth endpoints
+--------------
+Register:
+
+    POST /auth/register
+    Content-Type: application/json
+
+Body:
+
+    {
+      "username": "user",
+      "email": "user@example.com",
+      "password": "password"
+    }
+
+Login:
+
+    POST /auth/login
+    Content-Type: application/x-www-form-urlencoded
+
+Body fields:
+
+    username=<username-or-email>
+    password=<password>
+
+Login response:
+
+    {
+      "access_token": "...",
+      "refresh_token": "...",
+      "token_type": "bearer"
+    }
+
+Refresh access token:
+
+    POST /auth/refresh
+    Content-Type: application/json
+
+Body:
+
+    {
+      "refresh_token": "..."
+    }
+
+Logout:
+
+    POST /auth/logout
+    Content-Type: application/json
+
+Body:
+
+    {
+      "refresh_token": "..."
+    }
+
+Current user:
+
+    GET /auth/me
+    Authorization: Bearer <access_token>
+
+
+Protected collection endpoints
+------------------------------
+All endpoints below require:
+
+    Authorization: Bearer <access_token>
+
+Favorites:
+
+    POST   /api/favorites
+    GET    /api/favorites
+    DELETE /api/favorites/{tmdb_id}
+
+Watchlist:
+
+    POST   /api/watchlist
+    GET    /api/watchlist
+    DELETE /api/watchlist/{tmdb_id}
+
+Watched:
+
+    POST   /api/watched
+    GET    /api/watched
+    DELETE /api/watched/{tmdb_id}
+    PATCH  /api/watched/{tmdb_id}/rating
+
+POST body for favorites/watchlist/watched:
+
+    {
+      "tmdb_id": 123
+    }
+
+PATCH watched rating body:
+
+    {
+      "rating": 8
+    }
+
+Rating must be from 1 to 10.
+
+
+Frontend integration order
+--------------------------
+Recommended order:
+
+    1. Load popular movies from GET /api/movies.
+    2. Add search through GET /api/movies/search?query=<text>.
+    3. Add details through GET /api/movies/{movie_id}.
+    4. Connect login through POST /auth/login.
+    5. Store access_token and send Authorization header.
+    6. Connect favorites/watchlist/watched.
+    7. Connect refresh/logout.
+
+
+Current integration status
+--------------------------
+Already started:
+
+    - CORS is enabled.
+    - Frontend API client can call backend.
+    - Explore movie list can be loaded from /api/movies.
+
+Not connected yet:
+
+    - Real login UI.
+    - Token storage.
+    - Protected collection endpoints.
+    - Search endpoint.
+    - Movie details endpoint.
