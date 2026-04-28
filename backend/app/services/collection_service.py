@@ -1,7 +1,7 @@
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.user import User
+from app.repositories.collection_repository import CollectionRepository
 from app.services.movie_service import MovieService
 from app.services.movies_api import MoviesAPIClient
 
@@ -10,17 +10,12 @@ class MovieCollectionService:
     def __init__(self, db: Session):
         self.db = db
         self.movie_service = MovieService(db)
+        self.collection_repository = CollectionRepository(db)
 
     def add(self, model, user: User, tmdb_id: int, client: MoviesAPIClient):
         movie = self.movie_service.get_or_create_movie(client, tmdb_id)
 
-        stmt = select(model).where(
-            model.user_id == user.id,
-            model.movie_id == movie.id,
-        )
-        result = self.db.execute(stmt)
-        obj = result.scalar_one_or_none()
-
+        obj = self.collection_repository.get(model, user.id, movie.id)
         if obj:
             return obj
 
@@ -29,31 +24,26 @@ class MovieCollectionService:
             movie_id=movie.id,
         )
 
-        self.db.add(obj)
+        self.collection_repository.add(obj)
         self.db.commit()
         self.db.refresh(obj)
         return obj
 
     def get_all(self, model, user: User):
-        stmt = select(model).where(model.user_id == user.id)
-        result = self.db.execute(stmt)
-        return result.scalars().all()
+        return self.collection_repository.get_all(model, user.id)
 
-    def remove(self, model, user: User, tmdb_id: int):
+    def get_one(self, model, user: User, tmdb_id: int):
         movie = self.movie_service.get_movie_by_tmdb_id(tmdb_id)
         if movie is None:
             return None
 
-        stmt = select(model).where(
-            model.user_id == user.id,
-            model.movie_id == movie.id,
-        )
-        result = self.db.execute(stmt)
-        obj = result.scalar_one_or_none()
+        return self.collection_repository.get(model, user.id, movie.id)
 
+    def remove(self, model, user: User, tmdb_id: int):
+        obj = self.get_one(model, user, tmdb_id)
         if obj is None:
             return None
 
-        self.db.delete(obj)
+        self.collection_repository.delete(obj)
         self.db.commit()
         return obj
