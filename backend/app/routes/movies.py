@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.dependencies.movies import get_movies_api_client
 from app.services.movies_api import MoviesAPIClient
 from app.services.movie_service import MovieService
-from app.services.watchlist_service import WatchlistService
 from app.services.watched_service import WatchedService
 
 from app.database import get_db
@@ -47,41 +46,6 @@ def get_movie(
 ):
     service = MovieService(db)
     return service.get_movie_details(client, movie_id)
-
-
-@router.post("/watchlist")
-def add_watchlist(
-    body: MovieActionRequest,
-    db: Session = Depends(get_db),
-    client: MoviesAPIClient = Depends(get_movies_api_client),
-    current_user: User = Depends(get_current_user),
-):
-    service = WatchlistService(db)
-    return service.add(current_user, body.tmdb_id, client)
-
-
-@router.get("/watchlist")
-def get_watchlist(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    service = WatchlistService(db)
-    return service.get_all(current_user)
-
-
-@router.delete("/watchlist/{tmdb_id}")
-def delete_watchlist(
-    tmdb_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    service = WatchlistService(db)
-    watchlist = service.remove(current_user, tmdb_id)
-
-    if watchlist is None:
-        raise HTTPException(status_code=404, detail="Watchlist not found")
-
-    return watchlist
 
 
 @router.post("/watched")
