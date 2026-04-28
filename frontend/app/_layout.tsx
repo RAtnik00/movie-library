@@ -1,4 +1,3 @@
-// app/_layout.tsx
 import { AuthProvider, useAuth } from "@/context/auth-context";
 import { MoviesProvider } from "@/context/movie-context";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -17,7 +16,7 @@ function RootNavigator() {
   return (
     <Stack
       screenOptions={{ headerShown: false }}
-      initialRouteName={isLoggedIn ? "(tabs)" : "login"} // 👈 controls start screen
+      initialRouteName={isLoggedIn ? "(tabs)" : "login"}
     >
       <Stack.Screen name="login" />
       <Stack.Screen name="(tabs)" />
@@ -25,7 +24,7 @@ function RootNavigator() {
         name="modal"
         options={{ presentation: "modal", headerShown: true, title: "Modal" }}
       />
-      <Stack.Screen name="explore/[movieId]" options={{ animation: "none" }} />
+      <Stack.Screen name="explore/[movieId]" />
     </Stack>
   );
 }
