@@ -29,23 +29,3 @@ class WatchedService:
         self.db.commit()
         self.db.refresh(watched)
         return watched
-
-
-def add_to_watched(db: Session, user: User, tmdb_id: int, client: MoviesAPIClient) -> Watched:
-    service = WatchedService(db)
-    return service.add(user, tmdb_id, client)
-
-
-def get_user_watched(db: Session, user: User) -> list[Watched]:
-    service = WatchedService(db)
-    return service.get_all(user)
-
-
-def remove_from_watched(db: Session, user: User, tmdb_id: int) -> Watched | None:
-    service = WatchedService(db)
-    return service.remove(user, tmdb_id)
-
-
-def set_watched_rating(db: Session, user: User, tmdb_id: int, rating: int) -> Watched | None:
-    service = WatchedService(db)
-    return service.set_rating(user, tmdb_id, rating)

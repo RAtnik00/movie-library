@@ -15,6 +15,15 @@ class MovieService:
     def get_movie_by_tmdb_id(self, tmdb_id: int) -> Movie | None:
         return self.movie_repository.get_by_tmdb_id(tmdb_id)
 
+    def get_popular_movies(self, client: MoviesAPIClient):
+        return client.get_popular()
+
+    def search_movies(self, client: MoviesAPIClient, query: str):
+        return client.get_search(query)
+
+    def get_movie_details(self, client: MoviesAPIClient, movie_id: int):
+        return client.get_movie(movie_id)
+
     def get_or_create_movie(
         self,
         client: MoviesAPIClient,

@@ -18,18 +18,3 @@ class FavoriteService:
 
     def remove(self, user: User, tmdb_id: int) -> Favorite | None:
         return self.collection_service.remove(Favorite, user, tmdb_id)
-
-
-def add_to_favorites(db: Session, user: User, tmdb_id: int, client: MoviesAPIClient) -> Favorite:
-    service = FavoriteService(db)
-    return service.add(user, tmdb_id, client)
-
-
-def get_user_favorites(db: Session, user: User) -> list[Favorite]:
-    service = FavoriteService(db)
-    return service.get_all(user)
-
-
-def remove_from_favorites(db: Session, user: User, tmdb_id: int) -> Favorite | None:
-    service = FavoriteService(db)
-    return service.remove(user, tmdb_id)

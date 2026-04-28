@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.dependencies.movies import get_movies_api_client
 from app.services.movies_api import MoviesAPIClient
+from app.services.movie_service import MovieService
 from app.services.watchlist_service import WatchlistService
 from app.services.favorite_service import FavoriteService
 from app.services.watched_service import WatchedService
@@ -16,16 +17,30 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 @router.get("/movies")
-def get_movies(client: MoviesAPIClient = Depends(get_movies_api_client)):
-    return client.get_popular()
+def get_movies(
+        db: Session = Depends(get_db),
+        client: MoviesAPIClient = Depends(get_movies_api_client),
+):
+    service = MovieService(db)
+    return service.get_popular_movies(client)
 
 @router.get("/movies/search")
-def get_search(query: str, client: MoviesAPIClient = Depends(get_movies_api_client)):
-    return client.get_search(query)
+def get_search(
+        query: str,
+        db: Session = Depends(get_db),
+        client: MoviesAPIClient = Depends(get_movies_api_client),
+):
+    service = MovieService(db)
+    return service.search_movies(client, query)
 
 @router.get("/movies/{movie_id}")
-def get_movie(movie_id: int, client: MoviesAPIClient = Depends(get_movies_api_client)):
-    return client.get_movie(movie_id)
+def get_movie(
+        movie_id: int,
+        db: Session = Depends(get_db),
+        client: MoviesAPIClient = Depends(get_movies_api_client),
+):
+    service = MovieService(db)
+    return service.get_movie_details(client, movie_id)
 
 @router.post("/favorites")
 def add_favorites(

@@ -18,18 +18,3 @@ class WatchlistService:
 
     def remove(self, user: User, tmdb_id: int) -> Watchlist | None:
         return self.collection_service.remove(Watchlist, user, tmdb_id)
-
-
-def add_to_watchlist(db: Session, user: User, tmdb_id: int, client: MoviesAPIClient) -> Watchlist:
-    service = WatchlistService(db)
-    return service.add(user, tmdb_id, client)
-
-
-def get_user_watchlist(db: Session, user: User) -> list[Watchlist]:
-    service = WatchlistService(db)
-    return service.get_all(user)
-
-
-def remove_from_watchlist(db: Session, user: User, tmdb_id: int) -> Watchlist | None:
-    service = WatchlistService(db)
-    return service.remove(user, tmdb_id)
