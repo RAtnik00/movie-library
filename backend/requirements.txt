@@ -10,3 +10,4 @@ pwdlib
 httpx
 email-validator
 python-multipart
+pytest
