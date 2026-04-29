@@ -1,0 +1,48 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.dependencies.auth import get_current_user
+from app.dependencies.movies import get_movies_api_client
+from app.models.user import User
+from app.schemas.movie import MovieActionRequest, WatchlistResponse
+from app.services.movies_api import MoviesAPIClient
+from app.services.watchlist_service import WatchlistService
+
+
+router = APIRouter(prefix="/watchlist", tags=["watchlist"])
+
+
+@router.post("", response_model=WatchlistResponse)
+def add_watchlist(
+    body: MovieActionRequest,
+    db: Session = Depends(get_db),
+    client: MoviesAPIClient = Depends(get_movies_api_client),
+    current_user: User = Depends(get_current_user),
+):
+    service = WatchlistService(db)
+    return service.add(current_user, body.tmdb_id, client)
+
+
+@router.get("", response_model=list[WatchlistResponse])
+def get_watchlist(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    service = WatchlistService(db)
+    return service.get_all(current_user)
+
+
+@router.delete("/{tmdb_id}")
+def delete_watchlist(
+    tmdb_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    service = WatchlistService(db)
+    watchlist = service.remove(current_user, tmdb_id)
+
+    if watchlist is None:
+        raise HTTPException(status_code=404, detail="Watchlist not found")
+
+    return watchlist

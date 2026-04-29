@@ -1,33 +1,20 @@
-import os
 from logging.config import fileConfig
 
 from alembic import context
-from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 
+from app.core.config import settings
 from app.database import Base
-from app.models.movie import Movie
-from app.models.watchlist import Watchlist
-from app.models.watched import Watched
 from app.models.favorite import Favorite
-from app.models.user import User
+from app.models.movie import Movie
 from app.models.refresh_token import RefreshToken
-
-load_dotenv()
+from app.models.user import User
+from app.models.watched import Watched
+from app.models.watchlist import Watchlist
 
 config = context.config
 
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
-DB_NAME = os.getenv("DB_NAME")
-
-DATABASE_URL = (
-    f"postgresql+psycopg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
-
-config.set_main_option("sqlalchemy.url", DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

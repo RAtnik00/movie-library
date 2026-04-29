@@ -1,77 +1,31 @@
-from app.models.watched import Watched
-from app.models.user import User
-
 from sqlalchemy.orm import Session
-from sqlalchemy import select
 
-from app.services.favorite_service import get_or_create_movie, get_movie_by_tmdb_id
+from app.models.user import User
+from app.models.watched import Watched
+from app.services.collection_service import MovieCollectionService
 from app.services.movies_api import MoviesAPIClient
 
 
-def add_to_watched(db: Session, user: User, tmdb_id: int, client: MoviesAPIClient) -> Watched:
-    movie = get_or_create_movie(db, client, tmdb_id)
+class WatchedService:
+    def __init__(self, db: Session):
+        self.db = db
+        self.collection_service = MovieCollectionService(db)
 
-    stmt = select(Watched).where(
-        Watched.user_id == user.id,
-        Watched.movie_id == movie.id,
-    )
-    result = db.execute(stmt)
-    watched = result.scalar_one_or_none()
+    def add(self, user: User, tmdb_id: int, client: MoviesAPIClient) -> Watched:
+        return self.collection_service.add(Watched, user, tmdb_id, client)
 
-    if watched:
+    def get_all(self, user: User) -> list[Watched]:
+        return self.collection_service.get_all(Watched, user)
+
+    def remove(self, user: User, tmdb_id: int) -> Watched | None:
+        return self.collection_service.remove(Watched, user, tmdb_id)
+
+    def set_rating(self, user: User, tmdb_id: int, rating: int) -> Watched | None:
+        watched = self.collection_service.get_one(Watched, user, tmdb_id)
+        if watched is None:
+            return None
+
+        watched.rating = rating
+        self.db.commit()
+        self.db.refresh(watched)
         return watched
-
-    watched = Watched(
-        user_id=user.id,
-        movie_id=movie.id,
-    )
-
-    db.add(watched)
-    db.commit()
-    db.refresh(watched)
-    return watched
-
-def get_user_watched(db: Session, user: User) -> list[Watched]:
-    stmt = select(Watched).where(Watched.user_id == user.id)
-    result = db.execute(stmt)
-    return result.scalars().all()
-
-def remove_from_watched(db: Session, user: User, tmdb_id: int) -> Watched | None:
-    movie = get_movie_by_tmdb_id(db, tmdb_id)
-    if movie is None:
-        return None
-
-    stmt = select(Watched).where(
-        Watched.user_id == user.id,
-        Watched.movie_id == movie.id,
-    )
-    result = db.execute(stmt)
-    watched = result.scalar_one_or_none()
-
-    if watched is None:
-        return None
-
-    db.delete(watched)
-    db.commit()
-    return watched
-
-def set_watched_rating(db: Session, user: User, tmdb_id: int, rating: int) -> Watched:
-    movie = get_movie_by_tmdb_id(db, tmdb_id)
-    if movie is None:
-        return None
-
-    stmt = select(Watched).where(
-        Watched.user_id == user.id,
-        Watched.movie_id == movie.id,
-    )
-    result = db.execute(stmt)
-    watched = result.scalar_one_or_none()
-
-    if watched is None:
-        return None
-
-    watched.rating = rating
-
-    db.commit()
-    db.refresh(watched)
-    return watched

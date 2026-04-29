@@ -1,16 +1,16 @@
-import os
-
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-load_dotenv()
-DATABASE_URL = f"postgresql+psycopg://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
-engine = create_engine(DATABASE_URL)
+from app.core.config import settings
+
+
+engine = create_engine(settings.DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 class Base(DeclarativeBase):
     pass
+
 
 def get_db():
     db = SessionLocal()
