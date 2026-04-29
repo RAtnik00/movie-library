@@ -6,7 +6,7 @@ alembic
 pydantic-settings
 python-dotenv
 python-jose[cryptography]
-pwdlib
+pwdlib[argon2]
 httpx
 email-validator
 python-multipart

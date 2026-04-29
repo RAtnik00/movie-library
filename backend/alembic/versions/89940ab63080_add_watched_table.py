@@ -1,7 +1,7 @@
 """add watched table
 
 Revision ID: 89940ab63080
-Revises: 49bbca5b7140
+Revises: b6f2c8a13d44
 Create Date: 2026-04-20 13:43:09.847681
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '89940ab63080'
-down_revision: Union[str, Sequence[str], None] = '49bbca5b7140'
+down_revision: Union[str, Sequence[str], None] = 'b6f2c8a13d44'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
