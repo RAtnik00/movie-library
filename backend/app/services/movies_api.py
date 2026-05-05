@@ -17,8 +17,8 @@ class MoviesAPIClient:
         response.raise_for_status()
         return response.json()
 
-    def get_popular(self):
-        return self._get("/movie/popular", {"page": 1})
+    def get_popular(self, page: int = 1):
+        return self._get("/movie/popular", {"page": page})
 
     def get_search(self, query: str):
         return self._get("/search/movie", {"page": 1, "query": query})

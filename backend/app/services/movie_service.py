@@ -17,9 +17,9 @@ class MovieService:
     def get_movie_by_tmdb_id(self, tmdb_id: int) -> Movie | None:
         return self.movie_repository.get_by_tmdb_id(tmdb_id)
 
-    def get_popular_movies(self, client: MoviesAPIClient):
+    def get_popular_movies(self, client: MoviesAPIClient, page: int = 1):
         try:
-            return client.get_popular()
+            return client.get_popular(page)
         except httpx.HTTPStatusError as error:
             self._handle_movies_api_error(error)
 

@@ -11,11 +11,12 @@ router = APIRouter()
 
 @router.get("/movies")
 def get_movies(
+    page: int = 1,
     db: Session = Depends(get_db),
     client: MoviesAPIClient = Depends(get_movies_api_client),
 ):
     service = MovieService(db)
-    return service.get_popular_movies(client)
+    return service.get_popular_movies(client, page)
 
 
 @router.get("/movies/search")

@@ -2,7 +2,9 @@ import { Movie } from "@/components/types/movie";
 import { Platform } from "react-native";
 
 const DEFAULT_API_URL =
-  Platform.OS === "android" ? "http://10.0.2.2:8000" : "http://localhost:8000";
+  Platform.OS === "android"
+    ? "http://192.168.0.42:8000"
+    : "http://10.0.2.2:8000";
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
 
@@ -20,6 +22,7 @@ type TmdbMovie = {
 };
 
 type TmdbMoviesResponse = {
+  page: number;
   results: TmdbMovie[];
 };
 
@@ -51,7 +54,7 @@ function mapTmdbMovie(movie: TmdbMovie): Movie {
   };
 }
 
-export async function getPopularMovies(): Promise<Movie[]> {
-  const data = await apiRequest<TmdbMoviesResponse>("/api/movies");
+export async function getPopularMovies(page: number = 1): Promise<Movie[]> {
+  const data = await apiRequest<TmdbMoviesResponse>(`/api/movies?page=${page}`);
   return data.results.map(mapTmdbMovie);
 }
