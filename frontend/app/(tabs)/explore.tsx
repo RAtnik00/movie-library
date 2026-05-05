@@ -16,8 +16,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function ListScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const { movies, isLoading, error, refreshMovies, toggleFavorite } =
-    useMovies();
+  const {
+    movies,
+    isLoading,
+    isLoadingMore,
+    error,
+    refreshMovies,
+    loadMoreMovies,
+    toggleFavorite,
+  } = useMovies();
 
   const filteredMovies = movies.filter((movie) =>
     movie.title.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -48,16 +55,27 @@ export default function ListScreen() {
           keyExtractor={(item) => item.id}
           numColumns={3}
           columnWrapperStyle={styles.row}
+          onEndReached={() => {
+            if (!searchQuery) loadMoreMovies(); // don't paginate while searching
+          }}
+          onEndReachedThreshold={0.3} // trigger when 30% from bottom
+          ListFooterComponent={
+            isLoadingMore ? (
+              <ActivityIndicator
+                size="small"
+                color="#ffffff"
+                style={{ paddingVertical: 16 }}
+              />
+            ) : null
+          }
           renderItem={({ item }) => (
             <MovieCard
               {...item}
               onPress={() =>
-                router.push(
-                  {
-                    pathname: "/explore/[movieId]",
-                    params: { movieId: item.id },
-                  } as never,
-                )
+                router.push({
+                  pathname: "/explore/[movieId]",
+                  params: { movieId: item.id },
+                } as never)
               }
               onToggleFavorite={toggleFavorite}
             />
