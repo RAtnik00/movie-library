@@ -56,9 +56,9 @@ export default function ListScreen() {
           numColumns={3}
           columnWrapperStyle={styles.row}
           onEndReached={() => {
-            if (!searchQuery) loadMoreMovies(); // don't paginate while searching
+            if (!searchQuery) loadMoreMovies();
           }}
-          onEndReachedThreshold={0.3} // trigger when 30% from bottom
+          onEndReachedThreshold={0.3}
           ListFooterComponent={
             isLoadingMore ? (
               <ActivityIndicator
