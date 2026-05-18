@@ -43,9 +43,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Create Account</Text>
-
-        <Text style={styles.subtitle}>Register to continue using the app</Text>
+        <Text style={styles.title}>Movie Library</Text>
       </View>
 
       <TextInput
@@ -123,11 +121,6 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "700",
     marginBottom: 8,
-  },
-
-  subtitle: {
-    color: "#9ca3af",
-    fontSize: 14,
   },
 
   input: {
