@@ -2,9 +2,13 @@ import { Movie } from "@/components/types/movie";
 import { Platform } from "react-native";
 
 const DEFAULT_API_URL =
+<<<<<<< HEAD
   Platform.OS === "android"
     ? "http://10.0.2.2:8000"
     : "http://localhost:8000";
+=======
+  Platform.OS === "android" ? "http://10.0.2.2:8000" : "http://localhost:8000";
+>>>>>>> 0a6d1e32bd64ccf3e1153fb217f39baf3d315222
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
 
@@ -26,11 +30,27 @@ type TmdbMoviesResponse = {
   results: TmdbMovie[];
 };
 
-async function apiRequest<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`);
+export type AuthTokens = {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+};
+
+export type UserProfile = {
+  id: string;
+  username: string;
+  email: string;
+  created_at: string;
+};
+
+async function apiRequest<T>(path: string, options?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`, options);
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.detail ?? `API request failed: ${response.status}`,
+    );
   }
 
   return response.json();
@@ -57,4 +77,45 @@ function mapTmdbMovie(movie: TmdbMovie): Movie {
 export async function getPopularMovies(page: number = 1): Promise<Movie[]> {
   const data = await apiRequest<TmdbMoviesResponse>(`/api/movies?page=${page}`);
   return data.results.map(mapTmdbMovie);
+}
+
+//auth
+
+export async function registerUser(
+  username: string,
+  email: string,
+  password: string,
+): Promise<UserProfile> {
+  return apiRequest<UserProfile>("/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, email, password }),
+  });
+}
+
+export async function loginUser(
+  username: string,
+  password: string,
+): Promise<AuthTokens> {
+  const body = new URLSearchParams({ username, password });
+
+  return apiRequest<AuthTokens>("/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  });
+}
+
+export async function logoutUser(refresh_token: string): Promise<void> {
+  return apiRequest("/auth/logout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh_token }),
+  });
+}
+
+export async function getMe(access_token: string): Promise<UserProfile> {
+  return apiRequest<UserProfile>("/auth/me", {
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
 }
