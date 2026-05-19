@@ -38,6 +38,7 @@ class AuthService:
             username=body.username,
             email=body.email,
             password_hash=password_hash,
+            birth_date=body.birth_date,
         )
 
         try:
@@ -52,6 +53,7 @@ class AuthService:
             id=user.id,
             username=user.username,
             email=user.email,
+            birth_date=user.birth_date,
             created_at=user.created_at,
         )
 

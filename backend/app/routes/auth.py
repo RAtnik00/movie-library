@@ -50,5 +50,6 @@ def get_me(current_user: User = Depends(get_current_user)):
         id=current_user.id,
         username=current_user.username,
         email=current_user.email,
+        birth_date=current_user.birth_date,
         created_at=current_user.created_at,
     )

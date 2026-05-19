@@ -31,9 +31,11 @@ class FakeMoviesClientWithServerError:
 class FakeMoviesClient:
     def __init__(self):
         self.called = False
+        self.page = None
 
-    def get_popular(self):
+    def get_popular(self, page: int):
         self.called = True
+        self.page = page
         return [{"id": 1, "title": "Inception"}]
 
 
@@ -88,6 +90,7 @@ def test_get_popular_movies_returns_client_result():
 
     assert result == [{"id": 1, "title": "Inception"}]
     assert client.called
+    assert client.page == 1
 
 
 def test_search_movies_returns_client_result():
