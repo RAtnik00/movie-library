@@ -14,6 +14,15 @@ class Settings(BaseSettings):
     DB_PORT: int
     DB_NAME: str
 
+    SMTP_HOST: str
+    SMTP_PORT: int = 465
+    SMTP_USERNAME: str
+    SMTP_PASSWORD: str
+    SMTP_FROM_EMAIL: str
+    SMTP_USE_SSL: bool = True
+
+    FRONTEND_RESET_PASSWORD_URL: str
+
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
