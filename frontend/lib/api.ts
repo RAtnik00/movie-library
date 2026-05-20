@@ -8,7 +8,7 @@ export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
 
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 const POSTER_FALLBACK_URL =
-  "https://placehold.co/500x750/1b1d1f/ffffff?text=No+Poster";
+  "https://dummyimage.com/500x750/1b1d1f/ffffff&text=No+Poster";
 
 type TmdbMovie = {
   id: number;
@@ -50,6 +50,9 @@ async function apiRequest<T>(path: string, options?: RequestInit): Promise<T> {
   return response.json();
 }
 
+{
+  /* Movie Service */
+}
 function mapTmdbMovie(movie: TmdbMovie): Movie {
   return {
     id: String(movie.id),
@@ -73,7 +76,9 @@ export async function getPopularMovies(page: number = 1): Promise<Movie[]> {
   return data.results.map(mapTmdbMovie);
 }
 
-//auth
+{
+  /* Auth Service */
+}
 
 export async function registerUser(
   username: string,
@@ -112,4 +117,60 @@ export async function getMe(access_token: string): Promise<UserProfile> {
   return apiRequest<UserProfile>("/auth/me", {
     headers: { Authorization: `Bearer ${access_token}` },
   });
+}
+
+{
+  /* Serach and Favorite Services */
+}
+export async function searchMovies(query: string): Promise<Movie[]> {
+  const data = await apiRequest<TmdbMoviesResponse>(
+    `/api/movies/search?query=${encodeURIComponent(query)}`,
+  );
+  return data.results.map(mapTmdbMovie);
+}
+
+export async function getFavorites(access_token: string): Promise<Movie[]> {
+  const data = await apiRequest<any[]>("/api/favorites", {
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
+  return data.map((item) => ({
+    id: String(item.movie.tmdb_id),
+    title: item.title ?? "Untitled",
+    director: "Unknown director",
+    release_date: item.release_date?.slice(0, 4) || "Unknown",
+    score: 0,
+    favorite: true,
+    poster: item.poster_path
+      ? `${TMDB_IMAGE_BASE_URL}${item.poster_path}`
+      : POSTER_FALLBACK_URL,
+    desc: item.overview || "No description available.",
+  }));
+}
+
+export async function addFavorite(
+  tmdb_id: number,
+  access_token: string,
+): Promise<void> {
+  return apiRequest("/api/favorites", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${access_token}`,
+    },
+    body: JSON.stringify({ tmdb_id }),
+  });
+}
+
+export async function removeFavorite(
+  tmdb_id: number,
+  access_token: string,
+): Promise<void> {
+  return apiRequest(`/api/favorites/${tmdb_id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
+}
+
+{
+  /* Watched service */
 }

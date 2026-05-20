@@ -7,6 +7,9 @@ interface MovieCardProps extends Movie {
   onPress: () => void;
 }
 
+const POSTER_FALLBACK =
+  "https://dummyimage.com/500x750/1b1d1f/ffffff&text=No+Poster";
+
 export default function MovieCard({
   id,
   favorite,
@@ -20,9 +23,14 @@ export default function MovieCard({
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
     >
       <Image
-        source={{ uri: poster }}
+        source={{ uri: poster || POSTER_FALLBACK }}
         style={styles.poster}
         resizeMode="cover"
+        onError={(e) => {
+          e.currentTarget.setNativeProps({
+            src: [{ uri: POSTER_FALLBACK }],
+          });
+        }}
       />
 
       <View style={styles.overlay}>
@@ -31,9 +39,9 @@ export default function MovieCard({
           style={styles.iconButton}
         >
           <Ionicons
-            name={favorite ? "heart" : "heart-outline"}
+            name={favorite ? "eye" : "eye-outline"}
             size={18}
-            color={favorite ? "#ff4d4d" : "white"}
+            color={favorite ? "#d0ff4d" : "white"}
           />
         </Pressable>
       </View>
