@@ -7,12 +7,14 @@ class RegisterRequest(BaseModel):
     username: str
     email: EmailStr
     password: str
+    birth_date: datetime.date
 
 
 class RegisterResponse(BaseModel):
     id: int
     username: str
     email: EmailStr
+    birth_date: datetime.date | None
     created_at: datetime.datetime
 
 
@@ -33,3 +35,12 @@ class LogoutRequest(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetConfirmRequest(BaseModel):
+    token: str
+    new_password: str

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from types import SimpleNamespace
 
 import pytest
@@ -87,6 +87,7 @@ def test_register_rejects_existing_username():
         username="dima",
         email="dima@example.com",
         password="password",
+        birth_date=date(2000, 1, 1),
     )
 
     with pytest.raises(HTTPException) as error:
@@ -104,6 +105,7 @@ def test_register_rejects_existing_email():
         username="dima",
         email="dima@example.com",
         password="password",
+        birth_date=date(2000, 1, 1),
     )
 
     with pytest.raises(HTTPException) as error:
@@ -121,6 +123,7 @@ def test_register_creates_user_and_commits():
         username="dima",
         email="dima@example.com",
         password="password",
+        birth_date=date(2000, 1, 1),
     )
 
     result = service.register(body)
@@ -128,7 +131,9 @@ def test_register_creates_user_and_commits():
     assert result.id == 1
     assert result.username == "dima"
     assert result.email == "dima@example.com"
+    assert result.birth_date == date(2000, 1, 1)
     assert user_repository.added_user.username == "dima"
+    assert user_repository.added_user.birth_date == date(2000, 1, 1)
     assert user_repository.added_user.password_hash != "password"
     assert db.committed
     assert db.refreshed_obj is user_repository.added_user
