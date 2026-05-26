@@ -14,8 +14,6 @@ class CollectionMovieInfo(BaseModel):
     poster_path: str | None
 
     model_config = ConfigDict(from_attributes=True)
-
-
 class CommentUserInfo(BaseModel):
     id: int
     username: str
