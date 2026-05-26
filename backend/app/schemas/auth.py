@@ -7,20 +7,14 @@ class RegisterRequest(BaseModel):
     username: str
     email: EmailStr
     password: str
-<<<<<<< HEAD
     birth_date: datetime.date
-=======
->>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
 
 
 class RegisterResponse(BaseModel):
     id: int
     username: str
     email: EmailStr
-<<<<<<< HEAD
     birth_date: datetime.date | None
-=======
->>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
     created_at: datetime.datetime
 
 
@@ -41,7 +35,6 @@ class LogoutRequest(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
-<<<<<<< HEAD
 
 
 class PasswordResetRequest(BaseModel):
@@ -51,5 +44,3 @@ class PasswordResetRequest(BaseModel):
 class PasswordResetConfirmRequest(BaseModel):
     token: str
     new_password: str
-=======
->>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7

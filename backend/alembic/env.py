@@ -1,18 +1,11 @@
 from logging.config import fileConfig
 
 from alembic import context
-<<<<<<< HEAD
 from sqlalchemy import engine_from_config, pool, text
 
 from app.core.config import settings
 from app.database import Base
 from app.models.password_reset_token import PasswordResetToken
-=======
-from sqlalchemy import engine_from_config, pool
-
-from app.core.config import settings
-from app.database import Base
->>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
 from app.models.favorite import Favorite
 from app.models.movie import Movie
 from app.models.refresh_token import RefreshToken
