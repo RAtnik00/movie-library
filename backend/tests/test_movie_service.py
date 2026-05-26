@@ -147,6 +147,7 @@ def test_get_movie_details_adds_director_from_credits():
     result = service.get_movie_details(client, movie_id=123)
 
     assert result["director"] == "Director Name"
+    assert "credits" not in result
     assert client.called_with == 123
 
 

@@ -36,6 +36,7 @@ class MovieService:
             self._handle_movies_api_error(error)
 
         movie_data["director"] = self._extract_director(movie_data)
+        movie_data.pop("credits", None)
         return movie_data
 
     def get_or_create_movie(
