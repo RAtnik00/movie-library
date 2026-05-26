@@ -8,25 +8,14 @@ import {
 } from "@/lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
-
-type AuthContextType = {
-  user: UserProfile | null;
-  isLoggedIn: boolean;
-  isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  register: (
-    username: string,
-    email: string,
-    password: string,
-  ) => Promise<void>;
-  logout: () => Promise<void>;
-};
+import type { AuthContextType } from "./context-types/auth-context-type";
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const getAccessToken = async () => AsyncStorage.getItem("access_token");
 
   useEffect(() => {
     const resumeSession = async () => {
@@ -82,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         logout,
+        getAccessToken,
       }}
     >
       {children}

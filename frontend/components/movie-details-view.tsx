@@ -18,6 +18,12 @@ interface Props {
   onBack: () => void;
 }
 
+function formatRuntime(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
 export default function MovieDetailsView({
   movie,
   onDelete,
@@ -25,6 +31,12 @@ export default function MovieDetailsView({
   onBack,
 }: Props) {
   const [menuVisible, setMenuVisible] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(movie.favorite);
+
+  const handleToggleFavorite = () => {
+    setIsFavorite((prev) => !prev);
+    onToggleFavorite(movie.id);
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -34,11 +46,11 @@ export default function MovieDetailsView({
         </Pressable>
 
         <View style={styles.headerIcons}>
-          <Pressable onPress={() => onToggleFavorite(movie.id)}>
+          <Pressable onPress={handleToggleFavorite}>
             <Ionicons
-              name={movie.favorite ? "heart" : "heart-outline"}
+              name={isFavorite ? "heart" : "heart-outline"}
               size={22}
-              color={movie.favorite ? "#ff4d4d" : "white"}
+              color={isFavorite ? "#ff4d4d" : "white"}
             />
           </Pressable>
 
@@ -81,8 +93,8 @@ export default function MovieDetailsView({
       <EllipsisMenu
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
-        isFavorite={movie.favorite}
-        onToggleFavorite={() => onToggleFavorite(movie.id)}
+        isFavorite={isFavorite}
+        onToggleFavorite={handleToggleFavorite}
         onDelete={() => onDelete(movie.id)}
       />
     </ScrollView>
@@ -92,7 +104,7 @@ export default function MovieDetailsView({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#121212",
+    backgroundColor: "#1b1d1f",
     paddingHorizontal: 16,
   },
   header: {

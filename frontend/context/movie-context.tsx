@@ -1,5 +1,5 @@
 import { Movie } from "@/components/types/movie";
-import { getPopularMovies } from "@/lib/api";
+import { getFavorites, getPopularMovies } from "@/lib/api";
 import {
   createContext,
   ReactNode,
@@ -7,17 +7,8 @@ import {
   useEffect,
   useState,
 } from "react";
-
-interface MoviesContextType {
-  movies: Movie[];
-  isLoading: boolean;
-  isLoadingMore: boolean;
-  error: string | null;
-  refreshMovies: () => Promise<void>;
-  loadMoreMovies: () => Promise<void>;
-  toggleFavorite: (id: string) => void;
-  deleteMovie: (id: string) => void;
-}
+import { useAuth } from "@/context/auth-context";
+import { MoviesContextType } from "./context-types/movie-context-interface";
 
 const MoviesContext = createContext<MoviesContextType | null>(null);
 
@@ -27,14 +18,35 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const { getAccessToken, isLoggedIn } = useAuth();
+
+  const fetchFavoriteIds = async (): Promise<Set<string>> => {
+    try {
+      const token = await getAccessToken();
+      if (!token) return new Set();
+      const favorites = await getFavorites(token);
+      return new Set(favorites.map((f) => f.id));
+    } catch {
+      return new Set();
+    }
+  };
+
+  const applyFavorites = (
+    movieList: Movie[],
+    favoriteIds: Set<string>,
+  ): Movie[] =>
+    movieList.map((m) => ({ ...m, favorite: favoriteIds.has(m.id) }));
 
   const refreshMovies = async () => {
     try {
       setIsLoading(true);
       setError(null);
       setPage(1);
-      const popularMovies = await getPopularMovies(1);
-      setMovies(popularMovies);
+      const [popularMovies, favoriteIds] = await Promise.all([
+        getPopularMovies(1),
+        fetchFavoriteIds(),
+      ]);
+      setMovies(applyFavorites(popularMovies, favoriteIds));
     } catch {
       setError("Failed to load movies");
     } finally {
@@ -43,23 +55,27 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
   };
 
   const loadMoreMovies = async () => {
-    if (isLoadingMore) return; // prevent duplicate requests
+    if (isLoadingMore) return;
     try {
       setIsLoadingMore(true);
       const nextPage = page + 1;
-      const moreMovies = await getPopularMovies(nextPage);
-      setMovies((prev) => [...prev, ...moreMovies]);
+      const [moreMovies, favoriteIds] = await Promise.all([
+        getPopularMovies(nextPage),
+        fetchFavoriteIds(),
+      ]);
+      setMovies((prev) => [
+        ...prev,
+        ...applyFavorites(moreMovies, favoriteIds),
+      ]);
       setPage(nextPage);
-    } catch {
-      // silently fail on pagination — don't replace the whole screen with an error
     } finally {
       setIsLoadingMore(false);
     }
   };
 
   useEffect(() => {
-    refreshMovies();
-  }, []);
+    if (isLoggedIn) refreshMovies();
+  }, [isLoggedIn]);
 
   const toggleFavorite = (id: string) =>
     setMovies((prev) =>
