@@ -1,5 +1,9 @@
 import { Movie } from "@/components/types/movie";
+<<<<<<< HEAD
 import { getFavorites, getPopularMovies } from "@/lib/api";
+=======
+import { getPopularMovies } from "@/lib/api";
+>>>>>>> feature/connect-fronted-and-backend
 import {
   createContext,
   ReactNode,
@@ -7,14 +11,27 @@ import {
   useEffect,
   useState,
 } from "react";
+<<<<<<< HEAD
 import { useAuth } from "@/context/auth-context";
 import { MoviesContextType } from "./context-types/movie-context-interface";
+=======
+
+interface MoviesContextType {
+  movies: Movie[];
+  isLoading: boolean;
+  error: string | null;
+  refreshMovies: () => Promise<void>;
+  toggleFavorite: (id: string) => void;
+  deleteMovie: (id: string) => void;
+}
+>>>>>>> feature/connect-fronted-and-backend
 
 const MoviesContext = createContext<MoviesContextType | null>(null);
 
 export function MoviesProvider({ children }: { children: ReactNode }) {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+<<<<<<< HEAD
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -36,17 +53,25 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
     favoriteIds: Set<string>,
   ): Movie[] =>
     movieList.map((m) => ({ ...m, favorite: favoriteIds.has(m.id) }));
+=======
+  const [error, setError] = useState<string | null>(null);
+>>>>>>> feature/connect-fronted-and-backend
 
   const refreshMovies = async () => {
     try {
       setIsLoading(true);
       setError(null);
+<<<<<<< HEAD
       setPage(1);
       const [popularMovies, favoriteIds] = await Promise.all([
         getPopularMovies(1),
         fetchFavoriteIds(),
       ]);
       setMovies(applyFavorites(popularMovies, favoriteIds));
+=======
+      const popularMovies = await getPopularMovies();
+      setMovies(popularMovies);
+>>>>>>> feature/connect-fronted-and-backend
     } catch {
       setError("Failed to load movies");
     } finally {
@@ -54,6 +79,7 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
     }
   };
 
+<<<<<<< HEAD
   const loadMoreMovies = async () => {
     if (isLoadingMore) return;
     try {
@@ -76,6 +102,11 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isLoggedIn) refreshMovies();
   }, [isLoggedIn]);
+=======
+  useEffect(() => {
+    refreshMovies();
+  }, []);
+>>>>>>> feature/connect-fronted-and-backend
 
   const toggleFavorite = (id: string) =>
     setMovies((prev) =>
@@ -90,10 +121,15 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
       value={{
         movies,
         isLoading,
+<<<<<<< HEAD
         isLoadingMore,
         error,
         refreshMovies,
         loadMoreMovies,
+=======
+        error,
+        refreshMovies,
+>>>>>>> feature/connect-fronted-and-backend
         toggleFavorite,
         deleteMovie,
       }}

@@ -6,8 +6,15 @@ alembic
 pydantic-settings
 python-dotenv
 python-jose[cryptography]
+<<<<<<< HEAD
 pwdlib[argon2]
 httpx
 email-validator
 python-multipart
 pytest
+=======
+pwdlib
+httpx
+email-validator
+python-multipart
+>>>>>>> feature/connect-fronted-and-backend

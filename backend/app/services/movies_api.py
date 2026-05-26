@@ -17,17 +17,25 @@ class MoviesAPIClient:
         response.raise_for_status()
         return response.json()
 
+<<<<<<< HEAD
     def get_popular(self, page: int = 1):
         return self._get("/movie/popular", {"page": page})
+=======
+    def get_popular(self):
+        return self._get("/movie/popular", {"page": 1})
+>>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
 
     def get_search(self, query: str):
         return self._get("/search/movie", {"page": 1, "query": query})
 
     def get_movie(self, movie_id: int):
         return self._get(f"/movie/{movie_id}")
+<<<<<<< HEAD
 
     def get_movie_with_credits(self, movie_id: int):
         return self._get(
             f"/movie/{movie_id}",
             {"append_to_response": "credits"},
         )
+=======
+>>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
