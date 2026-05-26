@@ -19,12 +19,12 @@ def make_http_status_error(status_code: int) -> httpx.HTTPStatusError:
 
 
 class FakeMoviesClientWithNotFound:
-    def get_movie(self, movie_id: int):
+    def get_movie_with_credits(self, movie_id: int):
         raise make_http_status_error(404)
 
 
 class FakeMoviesClientWithServerError:
-    def get_movie(self, movie_id: int):
+    def get_movie_with_credits(self, movie_id: int):
         raise make_http_status_error(500)
 
 
@@ -54,6 +54,10 @@ class FakeMovieDetailsClient:
         self.called_with = None
 
     def get_movie(self, movie_id: int):
+        self.called_with = movie_id
+        return self.movie_data
+
+    def get_movie_with_credits(self, movie_id: int):
         self.called_with = movie_id
         return self.movie_data
 
@@ -123,6 +127,28 @@ def test_get_movie_details_converts_tmdb_500_to_http_exception():
 
     assert error.value.status_code == 502
     assert error.value.detail == "Movie provider unavailable"
+
+
+def test_get_movie_details_adds_director_from_credits():
+    service = MovieService(db=object())
+    client = FakeMovieDetailsClient(
+        movie_data={
+            "id": 123,
+            "title": "Movie",
+            "credits": {
+                "crew": [
+                    {"job": "Producer", "name": "Producer Name"},
+                    {"job": "Director", "name": "Director Name"},
+                ],
+            },
+        }
+    )
+
+    result = service.get_movie_details(client, movie_id=123)
+
+    assert result["director"] == "Director Name"
+    assert "credits" not in result
+    assert client.called_with == 123
 
 
 def test_get_or_create_movie_returns_existing_movie_without_calling_client():

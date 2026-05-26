@@ -25,3 +25,9 @@ class MoviesAPIClient:
 
     def get_movie(self, movie_id: int):
         return self._get(f"/movie/{movie_id}")
+
+    def get_movie_with_credits(self, movie_id: int):
+        return self._get(
+            f"/movie/{movie_id}",
+            {"append_to_response": "credits"},
+        )

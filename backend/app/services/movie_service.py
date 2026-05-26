@@ -31,9 +31,13 @@ class MovieService:
 
     def get_movie_details(self, client: MoviesAPIClient, movie_id: int):
         try:
-            return client.get_movie(movie_id)
+            movie_data = client.get_movie_with_credits(movie_id)
         except httpx.HTTPStatusError as error:
             self._handle_movies_api_error(error)
+
+        movie_data["director"] = self._extract_director(movie_data)
+        movie_data.pop("credits", None)
+        return movie_data
 
     def get_or_create_movie(
         self,
@@ -65,6 +69,15 @@ class MovieService:
         self.db.commit()
         self.db.refresh(movie)
         return movie
+
+    def _extract_director(self, movie_data: dict) -> str | None:
+        crew = movie_data.get("credits", {}).get("crew", [])
+
+        for person in crew:
+            if person.get("job") == "Director":
+                return person.get("name")
+
+        return None
 
     def _handle_movies_api_error(self, error: httpx.HTTPStatusError):
         status_code = error.response.status_code
