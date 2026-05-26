@@ -9,6 +9,7 @@ export type AuthContextType = {
     username: string,
     email: string,
     password: string,
+    birthDate: string,
   ) => Promise<void>;
   logout: () => Promise<void>;
   getAccessToken: () => Promise<string | null>;

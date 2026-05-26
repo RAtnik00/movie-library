@@ -4,7 +4,7 @@ import { useAuth } from "@/context/auth-context";
 import { Movie } from "@/components/types/movie";
 import { addFavorite, removeFavorite, API_URL } from "@/lib/api";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert, ActivityIndicator, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -23,39 +23,39 @@ export default function MovieDetails() {
   );
   const [isLoading, setIsLoading] = useState(!movie);
 
-  useEffect(() => {
+  const fetchMovie = useCallback(async () => {
     if (movie) return;
 
-    const fetchMovie = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/movies/${movieId}`);
-        if (!response.ok) throw new Error("Failed to fetch");
-        const data = await response.json();
+    try {
+      const response = await fetch(`${API_URL}/api/movies/${movieId}`);
+      if (!response.ok) throw new Error("Failed to fetch");
+      const data = await response.json();
 
-        setMovie({
-          id: String(data.id),
-          title: data.title ?? "Untitled",
-          director: "Unknown director",
-          release_date: data.release_date?.slice(0, 4) || "Unknown",
-          score:
-            typeof data.vote_average === "number"
-              ? Number(data.vote_average.toFixed(1))
-              : 0,
-          favorite: false,
-          poster: data.poster_path
-            ? `${TMDB_IMAGE_BASE_URL}${data.poster_path}`
-            : POSTER_FALLBACK_URL,
-          desc: data.overview || "No description available.",
-        });
-      } catch {
-        router.back();
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      setMovie({
+        id: String(data.id),
+        title: data.title ?? "Untitled",
+        director: data.director ?? "Unknown director",
+        release_date: data.release_date?.slice(0, 4) || "Unknown",
+        score:
+          typeof data.vote_average === "number"
+            ? Number(data.vote_average.toFixed(1))
+            : 0,
+        favorite: false,
+        poster: data.poster_path
+          ? `${TMDB_IMAGE_BASE_URL}${data.poster_path}`
+          : POSTER_FALLBACK_URL,
+        desc: data.overview || "No description available.",
+      });
+    } catch {
+      router.back();
+    } finally {
+      setIsLoading(false);
+    }
+  }, [movie, movieId, router]);
 
+  useEffect(() => {
     fetchMovie();
-  }, [movieId]);
+  }, [fetchMovie]);
 
   const handleToggleFavorite = async (id: string) => {
     if (!movie) return;

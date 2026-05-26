@@ -1,94 +1,79 @@
 import { Movie } from "@/components/types/movie";
-<<<<<<< HEAD
+import { useAuth } from "@/context/auth-context";
 import { getFavorites, getPopularMovies } from "@/lib/api";
-=======
-import { getPopularMovies } from "@/lib/api";
->>>>>>> feature/connect-fronted-and-backend
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
 } from "react";
-<<<<<<< HEAD
-import { useAuth } from "@/context/auth-context";
 import { MoviesContextType } from "./context-types/movie-context-interface";
-=======
-
-interface MoviesContextType {
-  movies: Movie[];
-  isLoading: boolean;
-  error: string | null;
-  refreshMovies: () => Promise<void>;
-  toggleFavorite: (id: string) => void;
-  deleteMovie: (id: string) => void;
-}
->>>>>>> feature/connect-fronted-and-backend
 
 const MoviesContext = createContext<MoviesContextType | null>(null);
+
+function applyFavorites(
+  movieList: Movie[],
+  favoriteIds: Set<string>,
+): Movie[] {
+  return movieList.map((movie) => ({
+    ...movie,
+    favorite: favoriteIds.has(movie.id),
+  }));
+}
 
 export function MoviesProvider({ children }: { children: ReactNode }) {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-<<<<<<< HEAD
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const { getAccessToken, isLoggedIn } = useAuth();
 
-  const fetchFavoriteIds = async (): Promise<Set<string>> => {
+  const fetchFavoriteIds = useCallback(async (): Promise<Set<string>> => {
     try {
       const token = await getAccessToken();
       if (!token) return new Set();
+
       const favorites = await getFavorites(token);
-      return new Set(favorites.map((f) => f.id));
+      return new Set(favorites.map((favorite) => favorite.id));
     } catch {
       return new Set();
     }
-  };
+  }, [getAccessToken]);
 
-  const applyFavorites = (
-    movieList: Movie[],
-    favoriteIds: Set<string>,
-  ): Movie[] =>
-    movieList.map((m) => ({ ...m, favorite: favoriteIds.has(m.id) }));
-=======
-  const [error, setError] = useState<string | null>(null);
->>>>>>> feature/connect-fronted-and-backend
-
-  const refreshMovies = async () => {
+  const refreshMovies = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-<<<<<<< HEAD
       setPage(1);
+
       const [popularMovies, favoriteIds] = await Promise.all([
         getPopularMovies(1),
         fetchFavoriteIds(),
       ]);
+
       setMovies(applyFavorites(popularMovies, favoriteIds));
-=======
-      const popularMovies = await getPopularMovies();
-      setMovies(popularMovies);
->>>>>>> feature/connect-fronted-and-backend
     } catch {
       setError("Failed to load movies");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fetchFavoriteIds]);
 
-<<<<<<< HEAD
-  const loadMoreMovies = async () => {
+  const loadMoreMovies = useCallback(async () => {
     if (isLoadingMore) return;
+
     try {
       setIsLoadingMore(true);
       const nextPage = page + 1;
+
       const [moreMovies, favoriteIds] = await Promise.all([
         getPopularMovies(nextPage),
         fetchFavoriteIds(),
       ]);
+
       setMovies((prev) => [
         ...prev,
         ...applyFavorites(moreMovies, favoriteIds),
@@ -97,39 +82,31 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoadingMore(false);
     }
-  };
+  }, [fetchFavoriteIds, isLoadingMore, page]);
 
   useEffect(() => {
-    if (isLoggedIn) refreshMovies();
-  }, [isLoggedIn]);
-=======
-  useEffect(() => {
     refreshMovies();
-  }, []);
->>>>>>> feature/connect-fronted-and-backend
+  }, [isLoggedIn, refreshMovies]);
 
   const toggleFavorite = (id: string) =>
     setMovies((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, favorite: !m.favorite } : m)),
+      prev.map((movie) =>
+        movie.id === id ? { ...movie, favorite: !movie.favorite } : movie,
+      ),
     );
 
   const deleteMovie = (id: string) =>
-    setMovies((prev) => prev.filter((m) => m.id !== id));
+    setMovies((prev) => prev.filter((movie) => movie.id !== id));
 
   return (
     <MoviesContext.Provider
       value={{
         movies,
         isLoading,
-<<<<<<< HEAD
         isLoadingMore,
         error,
         refreshMovies,
         loadMoreMovies,
-=======
-        error,
-        refreshMovies,
->>>>>>> feature/connect-fronted-and-backend
         toggleFavorite,
         deleteMovie,
       }}

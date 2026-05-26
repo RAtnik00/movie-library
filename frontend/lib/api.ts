@@ -2,27 +2,13 @@ import { Movie } from "@/components/types/movie";
 import { Platform } from "react-native";
 
 const DEFAULT_API_URL =
-<<<<<<< HEAD
-<<<<<<< HEAD
-  Platform.OS === "android"
-    ? "http://10.0.2.2:8000"
-    : "http://localhost:8000";
-=======
   Platform.OS === "android" ? "http://10.0.2.2:8000" : "http://localhost:8000";
->>>>>>> 0a6d1e32bd64ccf3e1153fb217f39baf3d315222
-=======
-  Platform.OS === "android" ? "http://10.0.2.2:8000" : "http://localhost:8000";
->>>>>>> feature/connect-fronted-and-backend
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
 
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 const POSTER_FALLBACK_URL =
-<<<<<<< HEAD
-  "https://dummyimage.com/500x750/1b1d1f/ffffff&text=No+Poster";
-=======
   "https://placehold.co/500x750/1b1d1f/ffffff?text=No+Poster";
->>>>>>> feature/connect-fronted-and-backend
 
 type TmdbMovie = {
   id: number;
@@ -31,12 +17,22 @@ type TmdbMovie = {
   poster_path?: string | null;
   release_date?: string;
   vote_average?: number;
+  director?: string | null;
 };
 
 type TmdbMoviesResponse = {
-<<<<<<< HEAD
-  page: number;
+  page?: number;
   results: TmdbMovie[];
+};
+
+type CollectionMovie = {
+  tmdb_id: number;
+  title?: string;
+  poster_path?: string | null;
+};
+
+type CollectionMovieResponse = {
+  movie: CollectionMovie;
 };
 
 export type AuthTokens = {
@@ -46,9 +42,10 @@ export type AuthTokens = {
 };
 
 export type UserProfile = {
-  id: string;
+  id: number;
   username: string;
   email: string;
+  birth_date: string | null;
   created_at: string;
 };
 
@@ -60,64 +57,71 @@ async function apiRequest<T>(path: string, options?: RequestInit): Promise<T> {
     throw new Error(
       errorData.detail ?? `API request failed: ${response.status}`,
     );
-=======
-  results: TmdbMovie[];
-};
-
-async function apiRequest<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`);
-
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
->>>>>>> feature/connect-fronted-and-backend
   }
 
   return response.json();
 }
 
-<<<<<<< HEAD
-{
-  /* Movie Service */
+function buildPosterUrl(posterPath?: string | null): string {
+  return posterPath ? `${TMDB_IMAGE_BASE_URL}${posterPath}` : POSTER_FALLBACK_URL;
 }
-=======
->>>>>>> feature/connect-fronted-and-backend
+
 function mapTmdbMovie(movie: TmdbMovie): Movie {
   return {
     id: String(movie.id),
     title: movie.title ?? "Untitled",
-    director: "Unknown director",
+    director: movie.director ?? "Unknown director",
     release_date: movie.release_date?.slice(0, 4) || "Unknown",
     score:
       typeof movie.vote_average === "number"
         ? Number(movie.vote_average.toFixed(1))
         : 0,
     favorite: false,
-    poster: movie.poster_path
-      ? `${TMDB_IMAGE_BASE_URL}${movie.poster_path}`
-      : POSTER_FALLBACK_URL,
+    poster: buildPosterUrl(movie.poster_path),
     desc: movie.overview || "No description available.",
   };
 }
 
-<<<<<<< HEAD
+function mapCollectionMovie(item: CollectionMovieResponse): Movie {
+  return {
+    id: String(item.movie.tmdb_id),
+    title: item.movie.title ?? "Untitled",
+    director: "Unknown director",
+    release_date: "Unknown",
+    score: 0,
+    favorite: true,
+    poster: buildPosterUrl(item.movie.poster_path),
+    desc: "No description available.",
+  };
+}
+
 export async function getPopularMovies(page: number = 1): Promise<Movie[]> {
   const data = await apiRequest<TmdbMoviesResponse>(`/api/movies?page=${page}`);
   return data.results.map(mapTmdbMovie);
 }
 
-{
-  /* Auth Service */
+export async function searchMovies(query: string): Promise<Movie[]> {
+  const data = await apiRequest<TmdbMoviesResponse>(
+    `/api/movies/search?query=${encodeURIComponent(query)}`,
+  );
+  return data.results.map(mapTmdbMovie);
 }
 
 export async function registerUser(
   username: string,
   email: string,
   password: string,
+  birthDate: string,
 ): Promise<UserProfile> {
   return apiRequest<UserProfile>("/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, email, password }),
+    body: JSON.stringify({
+      username,
+      email,
+      password,
+      birth_date: birthDate,
+    }),
   });
 }
 
@@ -148,32 +152,11 @@ export async function getMe(access_token: string): Promise<UserProfile> {
   });
 }
 
-{
-  /* Serach and Favorite Services */
-}
-export async function searchMovies(query: string): Promise<Movie[]> {
-  const data = await apiRequest<TmdbMoviesResponse>(
-    `/api/movies/search?query=${encodeURIComponent(query)}`,
-  );
-  return data.results.map(mapTmdbMovie);
-}
-
 export async function getFavorites(access_token: string): Promise<Movie[]> {
-  const data = await apiRequest<any[]>("/api/favorites", {
+  const data = await apiRequest<CollectionMovieResponse[]>("/api/favorites", {
     headers: { Authorization: `Bearer ${access_token}` },
   });
-  return data.map((item) => ({
-    id: String(item.movie.tmdb_id),
-    title: item.title ?? "Untitled",
-    director: "Unknown director",
-    release_date: item.release_date?.slice(0, 4) || "Unknown",
-    score: 0,
-    favorite: true,
-    poster: item.poster_path
-      ? `${TMDB_IMAGE_BASE_URL}${item.poster_path}`
-      : POSTER_FALLBACK_URL,
-    desc: item.overview || "No description available.",
-  }));
+  return data.map(mapCollectionMovie);
 }
 
 export async function addFavorite(
@@ -199,13 +182,3 @@ export async function removeFavorite(
     headers: { Authorization: `Bearer ${access_token}` },
   });
 }
-
-{
-  /* Watched service */
-}
-=======
-export async function getPopularMovies(): Promise<Movie[]> {
-  const data = await apiRequest<TmdbMoviesResponse>("/api/movies");
-  return data.results.map(mapTmdbMovie);
-}
->>>>>>> feature/connect-fronted-and-backend
