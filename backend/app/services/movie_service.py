@@ -17,15 +17,9 @@ class MovieService:
     def get_movie_by_tmdb_id(self, tmdb_id: int) -> Movie | None:
         return self.movie_repository.get_by_tmdb_id(tmdb_id)
 
-<<<<<<< HEAD
     def get_popular_movies(self, client: MoviesAPIClient, page: int = 1):
         try:
             return client.get_popular(page)
-=======
-    def get_popular_movies(self, client: MoviesAPIClient):
-        try:
-            return client.get_popular()
->>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
         except httpx.HTTPStatusError as error:
             self._handle_movies_api_error(error)
 
@@ -37,7 +31,6 @@ class MovieService:
 
     def get_movie_details(self, client: MoviesAPIClient, movie_id: int):
         try:
-<<<<<<< HEAD
             movie_data = client.get_movie_with_credits(movie_id)
         except httpx.HTTPStatusError as error:
             self._handle_movies_api_error(error)
@@ -46,12 +39,6 @@ class MovieService:
         movie_data.pop("credits", None)
         return movie_data
 
-=======
-            return client.get_movie(movie_id)
-        except httpx.HTTPStatusError as error:
-            self._handle_movies_api_error(error)
-
->>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
     def get_or_create_movie(
         self,
         client: MoviesAPIClient,
@@ -83,7 +70,6 @@ class MovieService:
         self.db.refresh(movie)
         return movie
 
-<<<<<<< HEAD
     def _extract_director(self, movie_data: dict) -> str | None:
         crew = movie_data.get("credits", {}).get("crew", [])
 
@@ -93,8 +79,6 @@ class MovieService:
 
         return None
 
-=======
->>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
     def _handle_movies_api_error(self, error: httpx.HTTPStatusError):
         status_code = error.response.status_code
 

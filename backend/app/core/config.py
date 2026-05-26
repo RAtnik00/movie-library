@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     DB_PORT: int
     DB_NAME: str
 
-<<<<<<< HEAD
     SMTP_HOST: str
     SMTP_PORT: int = 465
     SMTP_USERNAME: str
@@ -24,8 +23,6 @@ class Settings(BaseSettings):
 
     FRONTEND_RESET_PASSWORD_URL: str
 
-=======
->>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30

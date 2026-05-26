@@ -16,8 +16,4 @@ app.add_middleware(
 
 app.include_router(health_router)
 app.include_router(auth_router)
-<<<<<<< HEAD
 app.include_router(api_router)
-=======
-app.include_router(movies_router, prefix="/api")
->>>>>>> feature/connect-fronted-and-backend
