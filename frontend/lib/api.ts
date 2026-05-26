@@ -3,18 +3,26 @@ import { Platform } from "react-native";
 
 const DEFAULT_API_URL =
 <<<<<<< HEAD
+<<<<<<< HEAD
   Platform.OS === "android"
     ? "http://10.0.2.2:8000"
     : "http://localhost:8000";
 =======
   Platform.OS === "android" ? "http://10.0.2.2:8000" : "http://localhost:8000";
 >>>>>>> 0a6d1e32bd64ccf3e1153fb217f39baf3d315222
+=======
+  Platform.OS === "android" ? "http://10.0.2.2:8000" : "http://localhost:8000";
+>>>>>>> feature/connect-fronted-and-backend
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
 
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 const POSTER_FALLBACK_URL =
+<<<<<<< HEAD
   "https://dummyimage.com/500x750/1b1d1f/ffffff&text=No+Poster";
+=======
+  "https://placehold.co/500x750/1b1d1f/ffffff?text=No+Poster";
+>>>>>>> feature/connect-fronted-and-backend
 
 type TmdbMovie = {
   id: number;
@@ -26,6 +34,7 @@ type TmdbMovie = {
 };
 
 type TmdbMoviesResponse = {
+<<<<<<< HEAD
   page: number;
   results: TmdbMovie[];
 };
@@ -51,14 +60,27 @@ async function apiRequest<T>(path: string, options?: RequestInit): Promise<T> {
     throw new Error(
       errorData.detail ?? `API request failed: ${response.status}`,
     );
+=======
+  results: TmdbMovie[];
+};
+
+async function apiRequest<T>(path: string): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`);
+
+  if (!response.ok) {
+    throw new Error(`API request failed: ${response.status}`);
+>>>>>>> feature/connect-fronted-and-backend
   }
 
   return response.json();
 }
 
+<<<<<<< HEAD
 {
   /* Movie Service */
 }
+=======
+>>>>>>> feature/connect-fronted-and-backend
 function mapTmdbMovie(movie: TmdbMovie): Movie {
   return {
     id: String(movie.id),
@@ -77,6 +99,7 @@ function mapTmdbMovie(movie: TmdbMovie): Movie {
   };
 }
 
+<<<<<<< HEAD
 export async function getPopularMovies(page: number = 1): Promise<Movie[]> {
   const data = await apiRequest<TmdbMoviesResponse>(`/api/movies?page=${page}`);
   return data.results.map(mapTmdbMovie);
@@ -180,3 +203,9 @@ export async function removeFavorite(
 {
   /* Watched service */
 }
+=======
+export async function getPopularMovies(): Promise<Movie[]> {
+  const data = await apiRequest<TmdbMoviesResponse>("/api/movies");
+  return data.results.map(mapTmdbMovie);
+}
+>>>>>>> feature/connect-fronted-and-backend

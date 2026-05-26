@@ -3,7 +3,11 @@ import SearchBar from "@/components/search-bar";
 import { useMovies } from "@/context/movie-context";
 import { searchMovies } from "@/lib/api";
 import { useRouter } from "expo-router";
+<<<<<<< HEAD
 import { useEffect, useState } from "react";
+=======
+import { useState } from "react";
+>>>>>>> feature/connect-fronted-and-backend
 import {
   ActivityIndicator,
   FlatList,
@@ -18,10 +22,15 @@ import { Movie } from "@/components/types/movie";
 export default function ListScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+<<<<<<< HEAD
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+=======
+  const { movies, isLoading, error, refreshMovies, toggleFavorite } =
+    useMovies();
+>>>>>>> feature/connect-fronted-and-backend
 
   const {
     movies,
@@ -66,12 +75,17 @@ export default function ListScreen() {
     <SafeAreaView style={styles.container}>
       <SearchBar value={searchQuery} onChange={setSearchQuery} />
 
+<<<<<<< HEAD
       {showSpinner && (
+=======
+      {isLoading && (
+>>>>>>> feature/connect-fronted-and-backend
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#ffffff" />
         </View>
       )}
 
+<<<<<<< HEAD
       {!showSpinner && showError && (
         <View style={styles.center}>
           <Text style={styles.errorText}>{showError}</Text>
@@ -79,11 +93,18 @@ export default function ListScreen() {
             onPress={isInSearchMode ? undefined : refreshMovies}
             style={styles.retryButton}
           >
+=======
+      {!isLoading && error && (
+        <View style={styles.center}>
+          <Text style={styles.errorText}>{error}</Text>
+          <Pressable onPress={refreshMovies} style={styles.retryButton}>
+>>>>>>> feature/connect-fronted-and-backend
             <Text style={styles.retryText}>Try again</Text>
           </Pressable>
         </View>
       )}
 
+<<<<<<< HEAD
       {!showSpinner && !showError && (
         <FlatList
           data={displayedMovies}
@@ -110,14 +131,31 @@ export default function ListScreen() {
               />
             ) : null
           }
+=======
+      {!isLoading && !error && (
+        <FlatList
+          data={filteredMovies}
+          keyExtractor={(item) => item.id}
+          numColumns={3}
+          columnWrapperStyle={styles.row}
+>>>>>>> feature/connect-fronted-and-backend
           renderItem={({ item }) => (
             <MovieCard
               {...item}
               onPress={() =>
+<<<<<<< HEAD
                 router.push({
                   pathname: "/explore/[movieId]",
                   params: { movieId: item.id },
                 } as never)
+=======
+                router.push(
+                  {
+                    pathname: "/explore/[movieId]",
+                    params: { movieId: item.id },
+                  } as never,
+                )
+>>>>>>> feature/connect-fronted-and-backend
               }
               onToggleFavorite={toggleFavorite}
             />
@@ -145,9 +183,13 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "#f1f0ff",
+<<<<<<< HEAD
     fontSize: 24,
     fontWeight: "bold",
     marginTop: 40,
+=======
+    fontSize: 16,
+>>>>>>> feature/connect-fronted-and-backend
   },
   retryButton: {
     backgroundColor: "#2f6f4e",
