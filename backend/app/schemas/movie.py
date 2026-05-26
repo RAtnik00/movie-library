@@ -16,6 +16,13 @@ class CollectionMovieInfo(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class CommentUserInfo(BaseModel):
+    id: int
+    username: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class SetWatchedRatingRequest(BaseModel):
     rating: int = Field(ge=1, le=10)
 
@@ -39,3 +46,24 @@ class WatchlistResponse(MovieCollectionResponse):
 
 class WatchedResponse(MovieCollectionResponse):
     rating: int | None
+
+
+class MovieCommentCreateRequest(BaseModel):
+    tmdb_id: int
+    text: str = Field(min_length=1, max_length=1000)
+
+
+class MovieCommentUpdateRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=1000)
+
+
+class MovieCommentResponse(BaseModel):
+    id: int
+    movie_id: int
+    user_id: int
+    text: str
+    created_at: datetime.datetime
+    updated_at: datetime.datetime | None
+    user: CommentUserInfo
+
+    model_config = ConfigDict(from_attributes=True)
