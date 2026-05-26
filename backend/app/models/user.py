@@ -17,3 +17,4 @@ class User(Base):
     favorites = relationship("Favorite", back_populates="user")
     watchlist = relationship("Watchlist", back_populates="user")
     watched = relationship("Watched", back_populates="user")
+    comments = relationship("MovieComment", back_populates="user")

@@ -3,7 +3,6 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -14,6 +13,7 @@ import {
 export default function RegisterScreen() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -23,8 +23,18 @@ export default function RegisterScreen() {
   const router = useRouter();
 
   const handleRegister = async () => {
-    if (!username.trim() || !email.trim() || !password.trim()) {
+    if (
+      !username.trim() ||
+      !email.trim() ||
+      !birthDate.trim() ||
+      !password.trim()
+    ) {
       setError("Please fill in all fields");
+      return;
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate.trim())) {
+      setError("Use birth date format YYYY-MM-DD");
       return;
     }
 
@@ -37,7 +47,7 @@ export default function RegisterScreen() {
       setIsLoading(true);
       setError(null);
 
-      await register(username.trim(), email.trim(), password);
+      await register(username.trim(), email.trim(), password, birthDate.trim());
 
       router.replace("/(tabs)");
     } catch (e) {
@@ -81,6 +91,17 @@ export default function RegisterScreen() {
       />
 
       <TextInput
+        value={birthDate}
+        onChangeText={(t) => {
+          setBirthDate(t);
+          setError(null);
+        }}
+        style={styles.input}
+        placeholder="Birth date (YYYY-MM-DD)"
+        placeholderTextColor="#9ca3af"
+      />
+
+      <TextInput
         value={password}
         onChangeText={(t) => {
           setPassword(t);
@@ -121,7 +142,7 @@ export default function RegisterScreen() {
       </Pressable>
 
       <Pressable
-        onPress={() => router.replace("/(auth)/login")}
+        onPress={() => router.replace("/login" as never)}
         style={styles.signLink}
       >
         <Text style={styles.signLinkText}>
