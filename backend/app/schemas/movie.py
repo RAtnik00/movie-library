@@ -1,6 +1,10 @@
 import datetime
 
+<<<<<<< HEAD
 from pydantic import BaseModel, ConfigDict, Field
+=======
+from pydantic import BaseModel, Field
+>>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
 
 
 class MovieActionRequest(BaseModel):
@@ -13,7 +17,12 @@ class CollectionMovieInfo(BaseModel):
     title: str
     poster_path: str | None
 
+<<<<<<< HEAD
     model_config = ConfigDict(from_attributes=True)
+=======
+    class Config:
+        from_attributes = True
+>>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
 
 
 class SetWatchedRatingRequest(BaseModel):
@@ -26,7 +35,12 @@ class MovieCollectionResponse(BaseModel):
     created_at: datetime.datetime
     movie: CollectionMovieInfo
 
+<<<<<<< HEAD
     model_config = ConfigDict(from_attributes=True)
+=======
+    class Config:
+        from_attributes = True
+>>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
 
 
 class FavoriteResponse(MovieCollectionResponse):

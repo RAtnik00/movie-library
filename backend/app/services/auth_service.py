@@ -38,7 +38,10 @@ class AuthService:
             username=body.username,
             email=body.email,
             password_hash=password_hash,
+<<<<<<< HEAD
             birth_date=body.birth_date,
+=======
+>>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
         )
 
         try:
@@ -53,7 +56,10 @@ class AuthService:
             id=user.id,
             username=user.username,
             email=user.email,
+<<<<<<< HEAD
             birth_date=user.birth_date,
+=======
+>>>>>>> bf9dfd259fd9cb7334ca2b582fc89a6e2a9f57e7
             created_at=user.created_at,
         )
 
