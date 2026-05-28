@@ -14,6 +14,8 @@ class CollectionMovieInfo(BaseModel):
     poster_path: str | None
 
     model_config = ConfigDict(from_attributes=True)
+
+
 class CommentUserInfo(BaseModel):
     id: int
     username: str
@@ -63,5 +65,29 @@ class MovieCommentResponse(BaseModel):
     created_at: datetime.datetime
     updated_at: datetime.datetime | None
     user: CommentUserInfo
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MovieReminderCreateRequest(BaseModel):
+    tmdb_id: int
+    remind_at: datetime.datetime
+    note: str | None = Field(default=None, max_length=500)
+
+
+class MovieReminderUpdateRequest(BaseModel):
+    remind_at: datetime.datetime | None = None
+    note: str | None = Field(default=None, max_length=500)
+
+
+class MovieReminderResponse(BaseModel):
+    id: int
+    movie_id: int
+    user_id: int
+    remind_at: datetime.datetime
+    note: str | None
+    created_at: datetime.datetime
+    updated_at: datetime.datetime | None
+    movie: CollectionMovieInfo
 
     model_config = ConfigDict(from_attributes=True)
