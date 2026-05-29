@@ -31,6 +31,11 @@ export default function MovieDetailsView({
   const [isWatched, setIsWatched] = useState(movie.watched);
   const [isWatchlisted, setIsWatchlisted] = useState(movie.watchlisted);
 
+  function formatRuntime(minutes: number): string {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
   const handleToggleFavorite = () => {
     setIsFavorite((prev) => !prev);
     onToggleFavorite(movie.id);
