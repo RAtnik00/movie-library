@@ -8,5 +8,7 @@ export interface MoviesContextType {
   refreshMovies: () => Promise<void>;
   loadMoreMovies: () => Promise<void>;
   toggleFavorite: (id: string) => void;
+  toggleWatched: (id: string) => void;
+  toggleWatchlisted: (id: string) => void;
   deleteMovie: (id: string) => void;
 }

@@ -2,13 +2,7 @@ import { Movie } from "@/components/types/movie";
 import { Platform } from "react-native";
 
 const DEFAULT_API_URL =
-<<<<<<< HEAD
-  Platform.OS === "android"
-    ? "http://10.0.2.2:8000"
-    : "http://localhost:8000";
-=======
   Platform.OS === "android" ? "http://10.0.2.2:8000" : "http://localhost:8000";
->>>>>>> 0a6d1e32bd64ccf3e1153fb217f39baf3d315222
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
 
@@ -21,6 +15,7 @@ type TmdbMovie = {
   title?: string;
   overview?: string;
   poster_path?: string | null;
+  adult?: boolean;
   release_date?: string;
   vote_average?: number;
 };
@@ -69,7 +64,10 @@ function mapTmdbMovie(movie: TmdbMovie): Movie {
       typeof movie.vote_average === "number"
         ? Number(movie.vote_average.toFixed(1))
         : 0,
+    adult: movie.adult ?? false,
     favorite: false,
+    watched: false,
+    watchlisted: false,
     poster: movie.poster_path
       ? `${TMDB_IMAGE_BASE_URL}${movie.poster_path}`
       : POSTER_FALLBACK_URL,
@@ -145,7 +143,10 @@ export async function getFavorites(access_token: string): Promise<Movie[]> {
     director: "Unknown director",
     release_date: item.release_date?.slice(0, 4) || "Unknown",
     score: 0,
+    adult: item.adult ?? false,
     favorite: true,
+    watched: false,
+    watchlisted: false,
     poster: item.poster_path
       ? `${TMDB_IMAGE_BASE_URL}${item.poster_path}`
       : POSTER_FALLBACK_URL,
@@ -179,4 +180,112 @@ export async function removeFavorite(
 
 {
   /* Watched service */
+}
+
+export async function getWatched(access_token: string): Promise<Movie[]> {
+  const data = await apiRequest<any[]>("/api/watched", {
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
+  return data.map((item) => ({
+    id: String(item.movie.tmdb_id),
+    title: item.movie.title ?? "Untitled",
+    director: "Unknown director",
+    release_date: item.release_date?.slice(0, 4) || "Unknown",
+    score: 0,
+    adult: false,
+    favorite: false,
+    watched: true,
+    watchlisted: false,
+    poster: item.poster_path
+      ? `${TMDB_IMAGE_BASE_URL}${item.movie.poster_path}`
+      : POSTER_FALLBACK_URL,
+    desc: item.overview || "No description available.",
+  }));
+}
+
+export async function addWatched(
+  tmdb_id: number,
+  access_token: string,
+): Promise<void> {
+  return apiRequest("/api/watched", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${access_token}`,
+    },
+    body: JSON.stringify({ tmdb_id }),
+  });
+}
+
+export async function removeWatched(
+  tmdb_id: number,
+  access_token: string,
+): Promise<void> {
+  return apiRequest(`/api/watched/${tmdb_id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
+}
+
+export async function setWatchedRating(
+  tmdb_id: number,
+  rating: number,
+  access_token: string,
+): Promise<void> {
+  return apiRequest(`/api/watched/${tmdb_id}/rating`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${access_token}`,
+    },
+    body: JSON.stringify({ rating }),
+  });
+}
+
+{
+  /* Watchlist Service */
+}
+export async function getWatchlist(access_token: string): Promise<Movie[]> {
+  const data = await apiRequest<any[]>("/api/watchlist", {
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
+  return data.map((item) => ({
+    id: String(item.movie.tmdb_id),
+    title: item.movie.title ?? "Untitled",
+    director: "Unknown director",
+    release_date: "Unknown",
+    score: 0,
+    adult: false,
+    favorite: false,
+    watched: false,
+    watchlisted: true,
+    poster: item.movie.poster_path
+      ? `${TMDB_IMAGE_BASE_URL}${item.movie.poster_path}`
+      : POSTER_FALLBACK_URL,
+    desc: "No description available.",
+  }));
+}
+
+export async function addWatchlist(
+  tmdb_id: number,
+  access_token: string,
+): Promise<void> {
+  return apiRequest("/api/watchlist", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${access_token}`,
+    },
+    body: JSON.stringify({ tmdb_id }),
+  });
+}
+
+export async function removeWatchlist(
+  tmdb_id: number,
+  access_token: string,
+): Promise<void> {
+  return apiRequest(`/api/watchlist/${tmdb_id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
 }

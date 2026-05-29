@@ -13,8 +13,9 @@ import EllipsisMenu from "./elipsis-menu";
 
 interface Props {
   movie: Movie;
-  onDelete: (id: string) => void;
   onToggleFavorite: (id: string) => void;
+  onMarkWatched: (id: string) => void;
+  onToggleWatchlist: (id: string) => void;
   onBack: () => void;
 }
 
@@ -26,60 +27,89 @@ function formatRuntime(minutes: number): string {
 
 export default function MovieDetailsView({
   movie,
-  onDelete,
   onToggleFavorite,
+  onMarkWatched,
+  onToggleWatchlist,
   onBack,
 }: Props) {
   const [menuVisible, setMenuVisible] = useState(false);
   const [isFavorite, setIsFavorite] = useState(movie.favorite);
+  const [isWatched, setIsWatched] = useState(movie.watched);
+  const [isWatchlisted, setIsWatchlisted] = useState(movie.watchlisted);
 
   const handleToggleFavorite = () => {
     setIsFavorite((prev) => !prev);
     onToggleFavorite(movie.id);
   };
 
+  const handleMarkWatched = () => {
+    setIsWatched((prev) => !prev);
+    onMarkWatched(movie.id);
+  };
+
+  const handleToggleWatchlist = () => {
+    setIsWatchlisted((prev) => !prev);
+    onToggleWatchlist(movie.id);
+  };
+
   return (
     <ScrollView style={styles.container}>
+      {/*Toolbar*/}
+
       <View style={styles.header}>
         <Pressable onPress={onBack}>
-          <Ionicons name="arrow-back" size={24} color="white" />
+          <Ionicons
+            name="arrow-back"
+            size={22}
+            color="white"
+            style={styles.headerIcon}
+          />
         </Pressable>
-
         <View style={styles.headerIcons}>
           <Pressable onPress={handleToggleFavorite}>
             <Ionicons
               name={isFavorite ? "heart" : "heart-outline"}
               size={22}
               color={isFavorite ? "#ff4d4d" : "white"}
+              style={styles.headerIcon}
+            />
+          </Pressable>
+
+          <Pressable onPress={handleMarkWatched} style={styles.headerIcon}>
+            <Ionicons
+              name={isWatched ? "eye" : "eye-outline"}
+              size={22}
+              color={isWatched ? "#d0ff4d" : "white"}
             />
           </Pressable>
 
           <Pressable
-            onPress={() => onDelete(movie.id)}
-            style={styles.deleteIcon}
+            onPress={() => setMenuVisible(true)}
+            style={styles.headerIcon}
           >
-            <Ionicons name="trash" size={18} color="white" />
-          </Pressable>
-          <Pressable onPress={() => setMenuVisible(true)}>
             <Ionicons name="ellipsis-vertical" size={22} color="white" />
           </Pressable>
         </View>
       </View>
 
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "space-between",
-          flexDirection: "row",
-        }}
-      >
-        <View style={{ maxWidth: 200 }}>
+      {/* Poster + info */}
+
+      <View style={styles.topSection}>
+        <View style={styles.infoBlock}>
           <Text style={styles.title}>{movie.title}</Text>
-          <Text style={styles.meta}>
-            {movie.release_date} <Text>•</Text> DIRECTED BY
+
+          {movie.tagline ? (
+            <Text style={styles.tagline}>"{movie.tagline}"</Text>
+          ) : null}
+
+          <Text style={styles.timeDesc}>
+            {movie.release_date}
+            {movie.runtime ? ` • ${formatRuntime(movie.runtime)}` : ""}
           </Text>
-          <Text style={styles.dir}>{movie.director}</Text>
-          <Text style={styles.score}>⭐ {movie.score}</Text>
+
+          <Ionicons name="star" style={styles.score} size={16}>
+            {movie.score}
+          </Ionicons>
         </View>
 
         <Image
@@ -89,13 +119,32 @@ export default function MovieDetailsView({
         />
       </View>
 
+      {/* Genres */}
+
+      {movie.genres && movie.genres.length > 0 && (
+        <View style={styles.genreRow}>
+          {movie.genres.map((g) => (
+            <View key={g.id} style={styles.genreBadge}>
+              <Text style={styles.genreText}>{g.name}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/*Desc */}
+
+      <Text style={styles.sectionTitle}>Overview</Text>
       <Text style={styles.desc}>{movie.desc}</Text>
+
       <EllipsisMenu
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
         isFavorite={isFavorite}
         onToggleFavorite={handleToggleFavorite}
-        onDelete={() => onDelete(movie.id)}
+        isWatched={isWatched}
+        onMarkWatched={handleMarkWatched}
+        isWatchlisted={isWatchlisted}
+        onToggleWatchlist={handleToggleWatchlist}
       />
     </ScrollView>
   );
@@ -119,6 +168,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 20,
   },
+  headerIcon: {
+    backgroundColor: "#2a2d2f",
+    borderRadius: 18,
+    padding: 6,
+  },
+  topSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  infoBlock: {
+    flex: 1,
+    paddingRight: 12,
+  },
   poster: {
     width: 120,
     aspectRatio: 2 / 3,
@@ -126,33 +188,52 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "white",
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
-    marginTop: 15,
+    marginTop: 8,
   },
-  meta: {
-    color: "#aaa",
-    marginTop: 5,
+  tagline: {
+    color: "#888",
+    fontStyle: "italic",
+    fontSize: 13,
+    marginTop: 4,
   },
-  dir: {
+  timeDesc: {
     color: "#aaa",
-    fontWeight: "bold",
-    fontSize: 16,
+    marginTop: 6,
+    fontSize: 13,
   },
   score: {
     color: "#e6b800",
-    marginTop: 5,
+    marginTop: 6,
+  },
+  genreRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: 14,
+  },
+  genreBadge: {
+    backgroundColor: "#2a2d2f",
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  genreText: {
+    color: "#ccc",
+    fontSize: 12,
+  },
+  sectionTitle: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "700",
+    marginTop: 20,
+    marginBottom: 6,
   },
   desc: {
     color: "#ddd",
-    marginTop: 15,
     lineHeight: 22,
-  },
-  deleteIcon: {
-    backgroundColor: "#D11A2A",
-    padding: 7,
-    borderRadius: 6,
-    alignItems: "center",
-    justifyContent: "center",
+    fontSize: 14,
+    marginBottom: 30,
   },
 });
