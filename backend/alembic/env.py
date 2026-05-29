@@ -8,6 +8,8 @@ from app.database import Base
 from app.models.password_reset_token import PasswordResetToken
 from app.models.favorite import Favorite
 from app.models.movie import Movie
+from app.models.movie_comment import MovieComment
+from app.models.movie_reminder import MovieReminder
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
 from app.models.watched import Watched

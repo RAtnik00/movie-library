@@ -8,7 +8,7 @@ export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
 
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 const POSTER_FALLBACK_URL =
-  "https://dummyimage.com/500x750/1b1d1f/ffffff&text=No+Poster";
+  "https://placehold.co/500x750/1b1d1f/ffffff?text=No+Poster";
 
 type TmdbMovie = {
   id: number;
@@ -18,11 +18,22 @@ type TmdbMovie = {
   adult?: boolean;
   release_date?: string;
   vote_average?: number;
+  director?: string | null;
 };
 
 type TmdbMoviesResponse = {
-  page: number;
+  page?: number;
   results: TmdbMovie[];
+};
+
+type CollectionMovie = {
+  tmdb_id: number;
+  title?: string;
+  poster_path?: string | null;
+};
+
+type CollectionMovieResponse = {
+  movie: CollectionMovie;
 };
 
 export type AuthTokens = {
@@ -32,9 +43,10 @@ export type AuthTokens = {
 };
 
 export type UserProfile = {
-  id: string;
+  id: number;
   username: string;
   email: string;
+  birth_date: string | null;
   created_at: string;
 };
 
@@ -51,14 +63,15 @@ async function apiRequest<T>(path: string, options?: RequestInit): Promise<T> {
   return response.json();
 }
 
-{
-  /* Movie Service */
+function buildPosterUrl(posterPath?: string | null): string {
+  return posterPath ? `${TMDB_IMAGE_BASE_URL}${posterPath}` : POSTER_FALLBACK_URL;
 }
+
 function mapTmdbMovie(movie: TmdbMovie): Movie {
   return {
     id: String(movie.id),
     title: movie.title ?? "Untitled",
-    director: "Unknown director",
+    director: movie.director ?? "Unknown director",
     release_date: movie.release_date?.slice(0, 4) || "Unknown",
     score:
       typeof movie.vote_average === "number"
@@ -75,24 +88,46 @@ function mapTmdbMovie(movie: TmdbMovie): Movie {
   };
 }
 
+function mapCollectionMovie(item: CollectionMovieResponse): Movie {
+  return {
+    id: String(item.movie.tmdb_id),
+    title: item.movie.title ?? "Untitled",
+    director: "Unknown director",
+    release_date: "Unknown",
+    score: 0,
+    favorite: true,
+    poster: buildPosterUrl(item.movie.poster_path),
+    desc: "No description available.",
+  };
+}
+
 export async function getPopularMovies(page: number = 1): Promise<Movie[]> {
   const data = await apiRequest<TmdbMoviesResponse>(`/api/movies?page=${page}`);
   return data.results.map(mapTmdbMovie);
 }
 
-{
-  /* Auth Service */
+export async function searchMovies(query: string): Promise<Movie[]> {
+  const data = await apiRequest<TmdbMoviesResponse>(
+    `/api/movies/search?query=${encodeURIComponent(query)}`,
+  );
+  return data.results.map(mapTmdbMovie);
 }
 
 export async function registerUser(
   username: string,
   email: string,
   password: string,
+  birthDate: string,
 ): Promise<UserProfile> {
   return apiRequest<UserProfile>("/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, email, password }),
+    body: JSON.stringify({
+      username,
+      email,
+      password,
+      birth_date: birthDate,
+    }),
   });
 }
 
@@ -123,18 +158,8 @@ export async function getMe(access_token: string): Promise<UserProfile> {
   });
 }
 
-{
-  /* Serach and Favorite Services */
-}
-export async function searchMovies(query: string): Promise<Movie[]> {
-  const data = await apiRequest<TmdbMoviesResponse>(
-    `/api/movies/search?query=${encodeURIComponent(query)}`,
-  );
-  return data.results.map(mapTmdbMovie);
-}
-
 export async function getFavorites(access_token: string): Promise<Movie[]> {
-  const data = await apiRequest<any[]>("/api/favorites", {
+  const data = await apiRequest<CollectionMovieResponse[]>("/api/favorites", {
     headers: { Authorization: `Bearer ${access_token}` },
   });
   return data.map((item) => ({

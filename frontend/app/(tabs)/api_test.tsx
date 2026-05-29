@@ -18,7 +18,7 @@ export default function ApiTest() {
       const response = await fetch("http://fakestoreapi.com/products");
       const json = await response.json();
       setFilms(json);
-    } catch (err) {
+    } catch {
       setError("Failed to fetch films");
     } finally {
       setIsLoading(false);

@@ -1,5 +1,6 @@
 import MovieCard from "@/components/movie-card";
 import SearchBar from "@/components/search-bar";
+import { Movie } from "@/components/types/movie";
 import { useMovies } from "@/context/movie-context";
 import { searchMovies } from "@/lib/api";
 import { useRouter } from "expo-router";
@@ -13,7 +14,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Movie } from "@/components/types/movie";
 
 export default function ListScreen() {
   const router = useRouter();
@@ -105,7 +105,7 @@ export default function ListScreen() {
               <ActivityIndicator
                 size="small"
                 color="#ffffff"
-                style={{ paddingVertical: 16 }}
+                style={styles.footerLoader}
               />
             ) : null
           }
@@ -143,8 +143,8 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "#f1f0ff",
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "600",
     marginTop: 40,
   },
   retryButton: {
@@ -156,5 +156,8 @@ const styles = StyleSheet.create({
   retryText: {
     color: "white",
     fontWeight: "600",
+  },
+  footerLoader: {
+    paddingVertical: 16,
   },
 });

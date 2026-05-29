@@ -8,14 +8,24 @@ import {
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
 } from "react";
-import { useAuth } from "@/context/auth-context";
 import { MoviesContextType } from "./context-types/movie-context-interface";
 
 const MoviesContext = createContext<MoviesContextType | null>(null);
+
+function applyFavorites(
+  movieList: Movie[],
+  favoriteIds: Set<string>,
+): Movie[] {
+  return movieList.map((movie) => ({
+    ...movie,
+    favorite: favoriteIds.has(movie.id),
+  }));
+}
 
 export function MoviesProvider({ children }: { children: ReactNode }) {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -25,12 +35,13 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
   const [page, setPage] = useState(1);
   const { getAccessToken, isLoggedIn } = useAuth();
 
-  const fetchFavoriteIds = async (): Promise<Set<string>> => {
+  const fetchFavoriteIds = useCallback(async (): Promise<Set<string>> => {
     try {
       const token = await getAccessToken();
       if (!token) return new Set();
+
       const favorites = await getFavorites(token);
-      return new Set(favorites.map((f) => f.id));
+      return new Set(favorites.map((favorite) => favorite.id));
     } catch {
       return new Set();
     }
@@ -71,7 +82,7 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
       watchlisted: watchlistIds.has(m.id),
     }));
 
-  const refreshMovies = async () => {
+  const refreshMovies = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -91,10 +102,11 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fetchFavoriteIds]);
 
-  const loadMoreMovies = async () => {
+  const loadMoreMovies = useCallback(async () => {
     if (isLoadingMore) return;
+
     try {
       setIsLoadingMore(true);
       const nextPage = page + 1;
@@ -113,15 +125,17 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoadingMore(false);
     }
-  };
+  }, [fetchFavoriteIds, isLoadingMore, page]);
 
   useEffect(() => {
-    if (isLoggedIn) refreshMovies();
-  }, [isLoggedIn]);
+    refreshMovies();
+  }, [isLoggedIn, refreshMovies]);
 
   const toggleFavorite = (id: string) =>
     setMovies((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, favorite: !m.favorite } : m)),
+      prev.map((movie) =>
+        movie.id === id ? { ...movie, favorite: !movie.favorite } : movie,
+      ),
     );
 
   const toggleWatched = (id: string) =>
@@ -137,7 +151,7 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
     );
 
   const deleteMovie = (id: string) =>
-    setMovies((prev) => prev.filter((m) => m.id !== id));
+    setMovies((prev) => prev.filter((movie) => movie.id !== id));
 
   return (
     <MoviesContext.Provider

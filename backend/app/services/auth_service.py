@@ -55,7 +55,14 @@ class AuthService:
             email=user.email,
             birth_date=user.birth_date,
             created_at=user.created_at,
+            avatar_url=user.avatar_url,
         )
+
+    def update_avatar(self, user: User, avatar_url: str) -> User:
+        user.avatar_url = avatar_url
+        self.db.commit()
+        self.db.refresh(user)
+        return user
 
     def login(self, username_or_email: str, password: str) -> LoginResponse:
         user = self.user_repository.get_by_username_or_email(username_or_email)
@@ -70,7 +77,7 @@ class AuthService:
         refresh_token = create_refresh_token()
         refresh_token_hash = hash_token(refresh_token)
 
-        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+        expires_at = self._utc_now() + timedelta(days=7)
 
         new_token_entry = RefreshToken(
             user_id=user.id,
@@ -97,7 +104,7 @@ class AuthService:
         if token_entry.revoked_at is not None:
             raise HTTPException(status_code=401, detail="Token already revoked")
 
-        token_entry.revoked_at = datetime.now(timezone.utc)
+        token_entry.revoked_at = self._utc_now()
         self.db.commit()
 
         return {"message": "Logged out"}
@@ -112,7 +119,8 @@ class AuthService:
         if token_entry.revoked_at is not None:
             raise HTTPException(status_code=401, detail="Refresh token revoked")
 
-        if token_entry.expires_at < datetime.now(timezone.utc):
+        expires_at = self._to_naive_utc(token_entry.expires_at)
+        if expires_at < self._utc_now():
             raise HTTPException(status_code=401, detail="Refresh token expired")
 
         access_token = create_access_token(data={"sub": str(token_entry.user_id)})
@@ -121,3 +129,12 @@ class AuthService:
             "access_token": access_token,
             "token_type": "bearer",
         }
+
+    def _utc_now(self) -> datetime:
+        return datetime.now(timezone.utc).replace(tzinfo=None)
+
+    def _to_naive_utc(self, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            return value
+
+        return value.astimezone(timezone.utc).replace(tzinfo=None)

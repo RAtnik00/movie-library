@@ -3,7 +3,6 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -89,7 +88,7 @@ export default function LoginScreen() {
       </Pressable>
 
       <Pressable
-        onPress={() => router.push("/register")}
+        onPress={() => router.push("/register" as never)}
         style={({ pressed }) => [
           styles.registerLink,
           pressed && styles.buttonPressed,
