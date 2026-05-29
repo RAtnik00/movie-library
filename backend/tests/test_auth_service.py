@@ -6,7 +6,13 @@ from fastapi import HTTPException
 
 import app.services.auth_service as auth_module
 from app.core.security import decode_access_token, get_password_hash, hash_token
+from app.models.favorite import Favorite
+from app.models.movie import Movie
+from app.models.movie_comment import MovieComment
+from app.models.refresh_token import RefreshToken
 from app.models.user import User
+from app.models.watched import Watched
+from app.models.watchlist import Watchlist
 from app.schemas.auth import RegisterRequest
 from app.services.auth_service import AuthService
 
@@ -281,3 +287,16 @@ def test_refresh_returns_new_access_token():
 
     assert result["token_type"] == "bearer"
     assert decode_access_token(result["access_token"]) == 42
+
+
+def test_update_avatar_updates_user_and_commits():
+    db = FakeDb()
+    user = User(id=1, avatar_url=None)
+    service = make_auth_service(db=db)
+
+    result = service.update_avatar(user, "https://example.com/avatar.png")
+
+    assert result is user
+    assert user.avatar_url == "https://example.com/avatar.png"
+    assert db.committed
+    assert db.refreshed_obj is user
