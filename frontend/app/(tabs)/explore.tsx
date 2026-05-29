@@ -30,7 +30,6 @@ export default function ListScreen() {
     error,
     refreshMovies,
     loadMoreMovies,
-    toggleFavorite,
   } = useMovies();
 
   useEffect(() => {
@@ -119,7 +118,6 @@ export default function ListScreen() {
                   params: { movieId: item.id },
                 } as never)
               }
-              onToggleFavorite={toggleFavorite}
             />
           )}
         />

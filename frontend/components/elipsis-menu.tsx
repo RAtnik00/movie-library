@@ -4,16 +4,22 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   onToggleFavorite: () => void;
-  onDelete: () => void;
+  onMarkWatched: () => void;
+  onToggleWatchlist: () => void;
   isFavorite: boolean;
+  isWatched: boolean;
+  isWatchlisted: boolean;
 }
 
 export default function EllipsisMenu({
   visible,
   onClose,
   onToggleFavorite,
-  onDelete,
+  onMarkWatched,
+  onToggleWatchlist,
   isFavorite,
+  isWatched,
+  isWatchlisted,
 }: Props) {
   return (
     <Modal
@@ -37,13 +43,27 @@ export default function EllipsisMenu({
           </Pressable>
 
           <Pressable
-            style={[styles.item, styles.deleteItem]}
+            style={[styles.item, styles.borderedItem]}
             onPress={() => {
-              onDelete();
+              onMarkWatched();
               onClose();
             }}
           >
-            <Text style={[styles.text, { color: "#ff4d4d" }]}>Delete</Text>
+            <Text style={styles.text}>
+              {isWatched ? "Remove from watched" : "Add to watched"}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={[styles.item, styles.borderedItem]}
+            onPress={() => {
+              onToggleWatchlist();
+              onClose();
+            }}
+          >
+            <Text style={styles.text}>
+              {isWatchlisted ? "Remove from watchlist" : "Add to watchlist"}
+            </Text>
           </Pressable>
         </View>
       </Pressable>
@@ -69,7 +89,7 @@ const styles = StyleSheet.create({
   item: {
     padding: 12,
   },
-  deleteItem: {
+  borderedItem: {
     borderTopWidth: 1,
     borderTopColor: "#333",
   },

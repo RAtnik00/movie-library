@@ -1,14 +1,25 @@
+import { useAuth } from "@/context/auth-context";
+import { useMovies } from "@/context/movie-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Image, StyleSheet, Text, View } from "react-native";
 
 export default function ProfileCard() {
+  const { user } = useAuth();
+  const { movies } = useMovies();
+
+  const watchedCount = movies.filter((m) => m.watched).length;
+  const favoriteCount = movies.filter((m) => m.favorite).length;
+  const watchlistCount = movies.filter((m) => m.watchlisted).length;
+
+  const stats = [
+    { label: "Watched", value: String(watchedCount) },
+    { label: "Favorite", value: String(favoriteCount) },
+    { label: "Watchlist", value: String(watchlistCount) },
+  ];
+
   return (
     <View style={styles.screen}>
-      <Ionicons
-        name="settings-outline"
-        size={30}
-        style={styles.settingIcon}
-      ></Ionicons>
+      <Ionicons name="settings-outline" size={30} style={styles.settingIcon} />
       <View style={styles.container}>
         <View style={styles.avatarWrapper}>
           <Image
@@ -19,14 +30,10 @@ export default function ProfileCard() {
           />
         </View>
 
-        <Text style={styles.name}>Super_Cutie</Text>
+        <Text style={styles.name}>{user?.username ?? "—"}</Text>
 
         <View style={styles.statsRow}>
-          {[
-            { label: "Rated films", value: "351" },
-            { label: "Favorite", value: "24" },
-            { label: "Lists", value: "16" },
-          ].map((stat, i, arr) => (
+          {stats.map((stat, i, arr) => (
             <View
               key={stat.label}
               style={[styles.statItem, i < arr.length - 1 && styles.statBorder]}

@@ -2,7 +2,15 @@ import MovieDetailsView from "@/components/movie-details-view";
 import { useMovies } from "@/context/movie-context";
 import { useAuth } from "@/context/auth-context";
 import { Movie } from "@/components/types/movie";
-import { addFavorite, removeFavorite, API_URL } from "@/lib/api";
+import {
+  addFavorite,
+  removeFavorite,
+  API_URL,
+  addWatched,
+  removeWatched,
+  addWatchlist,
+  removeWatchlist,
+} from "@/lib/api";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, ActivityIndicator, View } from "react-native";
@@ -14,44 +22,59 @@ const POSTER_FALLBACK_URL =
 
 export default function MovieDetails() {
   const { movieId } = useLocalSearchParams();
+
   const router = useRouter();
-  const { movies, toggleFavorite, deleteMovie } = useMovies();
+
+  const {
+    movies,
+    toggleFavorite,
+    toggleWatched,
+    toggleWatchlisted,
+    deleteMovie,
+  } = useMovies();
+
   const { getAccessToken } = useAuth();
 
   const [movie, setMovie] = useState<Movie | null>(
     movies.find((m) => m.id === movieId) ?? null,
   );
-  const [isLoading, setIsLoading] = useState(!movie);
 
-  const fetchMovie = useCallback(async () => {
-    if (movie) return;
+  const [isLoading, setIsLoading] = useState(true);
 
-    try {
-      const response = await fetch(`${API_URL}/api/movies/${movieId}`);
-      if (!response.ok) throw new Error("Failed to fetch");
-      const data = await response.json();
+  useEffect(() => {
+    const fetchMovie = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/movies/${movieId}`);
+        if (!response.ok) throw new Error("Failed to fetch");
+        const data = await response.json();
 
-      setMovie({
-        id: String(data.id),
-        title: data.title ?? "Untitled",
-        director: data.director ?? "Unknown director",
-        release_date: data.release_date?.slice(0, 4) || "Unknown",
-        score:
-          typeof data.vote_average === "number"
-            ? Number(data.vote_average.toFixed(1))
-            : 0,
-        favorite: false,
-        poster: data.poster_path
-          ? `${TMDB_IMAGE_BASE_URL}${data.poster_path}`
-          : POSTER_FALLBACK_URL,
-        desc: data.overview || "No description available.",
-      });
-    } catch {
-      router.back();
-    } finally {
-      setIsLoading(false);
-    }
-  }, [movie, movieId, router]);
+        setMovie((prev) => ({
+          id: String(data.id),
+          title: data.title ?? "Untitled",
+          director: "Unknown director",
+          release_date: data.release_date?.slice(0, 4) || "Unknown",
+          score:
+            typeof data.vote_average === "number"
+              ? Number(data.vote_average.toFixed(1))
+              : 0,
+          adult: data.adult,
+          favorite: prev?.favorite ?? false,
+          watched: prev?.watched ?? false,
+          watchlisted: prev?.watchlisted ?? false,
+          poster: data.poster_path
+            ? `${TMDB_IMAGE_BASE_URL}${data.poster_path}`
+            : POSTER_FALLBACK_URL,
+          desc: data.overview || "No description available.",
+          tagline: data.tagline,
+          genres: data.genres,
+          runtime: data.runtime,
+        }));
+      } catch {
+        if (!movie) router.back();
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
   useEffect(() => {
     fetchMovie();
@@ -87,6 +110,54 @@ export default function MovieDetails() {
     }
   };
 
+  const handleMarkWatched = async (id: string) => {
+    const token = await getAccessToken();
+    if (!token) {
+      Alert.alert("Error", "You must be logged in");
+      return;
+    }
+    const willBeWatched = !movie?.watched;
+    setMovie((prev) => (prev ? { ...prev, watched: willBeWatched } : prev));
+    toggleWatched(id);
+    try {
+      if (willBeWatched) {
+        await addWatched(Number(id), token);
+      } else {
+        await removeWatched(Number(id), token);
+      }
+    } catch {
+      setMovie((prev) => (prev ? { ...prev, watched: !willBeWatched } : prev));
+      toggleWatched(id);
+      Alert.alert("Error", "Failed to update watched status");
+    }
+  };
+
+  const handleToggleWatchlist = async (id: string) => {
+    const token = await getAccessToken();
+    if (!token) {
+      Alert.alert("Error", "You must be logged in");
+      return;
+    }
+    const willBeWatchlisted = !movie?.watchlisted;
+    setMovie((prev) =>
+      prev ? { ...prev, watchlisted: willBeWatchlisted } : prev,
+    );
+    toggleWatchlisted(id);
+    try {
+      if (willBeWatchlisted) {
+        await addWatchlist(Number(id), token);
+      } else {
+        await removeWatchlist(Number(id), token);
+      }
+    } catch {
+      setMovie((prev) =>
+        prev ? { ...prev, watchlisted: !willBeWatchlisted } : prev,
+      );
+      toggleWatchlisted(id);
+      Alert.alert("Error", "Failed to update watchlist");
+    }
+  };
+
   if (isLoading) {
     return (
       <View
@@ -108,23 +179,9 @@ export default function MovieDetails() {
     <SafeAreaView style={{ flex: 1 }}>
       <MovieDetailsView
         movie={movie}
-        onDelete={(id) =>
-          Alert.alert(
-            "Deleting",
-            "Are you sure you want to delete this movie?",
-            [
-              { text: "Cancel", style: "cancel" },
-              {
-                text: "OK",
-                onPress: () => {
-                  deleteMovie(id);
-                  router.back();
-                },
-              },
-            ],
-          )
-        }
         onToggleFavorite={handleToggleFavorite}
+        onMarkWatched={handleMarkWatched}
+        onToggleWatchlist={handleToggleWatchlist}
         onBack={() => router.back()}
       />
     </SafeAreaView>

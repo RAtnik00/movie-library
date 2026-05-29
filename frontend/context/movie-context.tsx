@@ -1,6 +1,10 @@
 import { Movie } from "@/components/types/movie";
-import { useAuth } from "@/context/auth-context";
-import { getFavorites, getPopularMovies } from "@/lib/api";
+import {
+  getFavorites,
+  getPopularMovies,
+  getWatched,
+  getWatchlist,
+} from "@/lib/api";
 import {
   createContext,
   ReactNode,
@@ -41,20 +45,58 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
     } catch {
       return new Set();
     }
-  }, [getAccessToken]);
+  };
+
+  const fetchWatchedIds = async (): Promise<Set<string>> => {
+    try {
+      const token = await getAccessToken();
+      if (!token) return new Set();
+      const watched = await getWatched(token);
+      return new Set(watched.map((w) => w.id));
+    } catch {
+      return new Set();
+    }
+  };
+
+  const fetchWatchlistIds = async (): Promise<Set<string>> => {
+    try {
+      const token = await getAccessToken();
+      if (!token) return new Set();
+      const watchlist = await getWatchlist(token);
+      return new Set(watchlist.map((w) => w.id));
+    } catch {
+      return new Set();
+    }
+  };
+
+  const applyStatuses = (
+    movieList: Movie[],
+    favoriteIds: Set<string>,
+    watchedIds: Set<string>,
+    watchlistIds: Set<string>,
+  ): Movie[] =>
+    movieList.map((m) => ({
+      ...m,
+      favorite: favoriteIds.has(m.id),
+      watched: watchedIds.has(m.id),
+      watchlisted: watchlistIds.has(m.id),
+    }));
 
   const refreshMovies = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
       setPage(1);
-
-      const [popularMovies, favoriteIds] = await Promise.all([
-        getPopularMovies(1),
-        fetchFavoriteIds(),
-      ]);
-
-      setMovies(applyFavorites(popularMovies, favoriteIds));
+      const [popularMovies, favoriteIds, watchedIds, watchlistIds] =
+        await Promise.all([
+          getPopularMovies(1),
+          fetchFavoriteIds(),
+          fetchWatchedIds(),
+          fetchWatchlistIds(),
+        ]);
+      setMovies(
+        applyStatuses(popularMovies, favoriteIds, watchedIds, watchlistIds),
+      );
     } catch {
       setError("Failed to load movies");
     } finally {
@@ -68,15 +110,16 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoadingMore(true);
       const nextPage = page + 1;
-
-      const [moreMovies, favoriteIds] = await Promise.all([
-        getPopularMovies(nextPage),
-        fetchFavoriteIds(),
-      ]);
-
+      const [moreMovies, favoriteIds, watchedIds, watchlistIds] =
+        await Promise.all([
+          getPopularMovies(nextPage),
+          fetchFavoriteIds(),
+          fetchWatchedIds(),
+          fetchWatchlistIds(),
+        ]);
       setMovies((prev) => [
         ...prev,
-        ...applyFavorites(moreMovies, favoriteIds),
+        ...applyStatuses(moreMovies, favoriteIds, watchedIds, watchlistIds),
       ]);
       setPage(nextPage);
     } finally {
@@ -95,6 +138,18 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
       ),
     );
 
+  const toggleWatched = (id: string) =>
+    setMovies((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, watched: !m.watched } : m)),
+    );
+
+  const toggleWatchlisted = (id: string) =>
+    setMovies((prev) =>
+      prev.map((m) =>
+        m.id === id ? { ...m, watchlisted: !m.watchlisted } : m,
+      ),
+    );
+
   const deleteMovie = (id: string) =>
     setMovies((prev) => prev.filter((movie) => movie.id !== id));
 
@@ -108,6 +163,8 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
         refreshMovies,
         loadMoreMovies,
         toggleFavorite,
+        toggleWatched,
+        toggleWatchlisted,
         deleteMovie,
       }}
     >

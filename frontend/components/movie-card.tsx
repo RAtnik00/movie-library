@@ -1,22 +1,14 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import { Image, Pressable, StyleSheet } from "react-native";
 import { Movie } from "./types/movie";
 
 interface MovieCardProps extends Movie {
-  onToggleFavorite: (id: string) => void;
   onPress: () => void;
 }
 
 const POSTER_FALLBACK =
   "https://dummyimage.com/500x750/1b1d1f/ffffff&text=No+Poster";
 
-export default function MovieCard({
-  id,
-  favorite,
-  poster,
-  onToggleFavorite,
-  onPress,
-}: MovieCardProps) {
+export default function MovieCard({ poster, onPress }: MovieCardProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -32,19 +24,6 @@ export default function MovieCard({
           });
         }}
       />
-
-      <View style={styles.overlay}>
-        <Pressable
-          onPress={() => onToggleFavorite(id)}
-          style={styles.iconButton}
-        >
-          <Ionicons
-            name={favorite ? "eye" : "eye-outline"}
-            size={18}
-            color={favorite ? "#d0ff4d" : "white"}
-          />
-        </Pressable>
-      </View>
     </Pressable>
   );
 }
@@ -64,24 +43,5 @@ const styles = StyleSheet.create({
   poster: {
     width: "100%",
     height: "100%",
-  },
-  overlay: {
-    position: "absolute",
-    top: 4,
-    right: 4,
-    gap: 6,
-    alignItems: "center",
-  },
-  iconButton: {
-    backgroundColor: "#00000080",
-    borderRadius: 12,
-    padding: 4,
-  },
-  deleteButton: {
-    backgroundColor: "#D11A2A",
-    borderRadius: 6,
-    padding: 4,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

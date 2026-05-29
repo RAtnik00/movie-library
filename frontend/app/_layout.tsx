@@ -24,6 +24,7 @@ function RootNavigator() {
         options={{ presentation: "modal", headerShown: true, title: "Modal" }}
       />
       <Stack.Screen name="explore/[movieId]" options={{ animation: "none" }} />
+      <Stack.Screen name="(lists)" options={{ animation: "none" }} />
     </Stack>
   );
 }
