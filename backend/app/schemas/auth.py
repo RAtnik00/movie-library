@@ -16,6 +16,7 @@ class RegisterResponse(BaseModel):
     email: EmailStr
     birth_date: datetime.date | None
     created_at: datetime.datetime
+    avatar_url: str | None
 
 
 class LoginRequest(BaseModel):
@@ -44,3 +45,7 @@ class PasswordResetRequest(BaseModel):
 class PasswordResetConfirmRequest(BaseModel):
     token: str
     new_password: str
+
+
+class UpdateAvatarRequest(BaseModel):
+    avatar_url: str
