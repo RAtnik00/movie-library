@@ -55,7 +55,14 @@ class AuthService:
             email=user.email,
             birth_date=user.birth_date,
             created_at=user.created_at,
+            avatar_url=user.avatar_url,
         )
+
+    def update_avatar(self, user: User, avatar_url: str) -> User:
+        user.avatar_url = avatar_url
+        self.db.commit()
+        self.db.refresh(user)
+        return user
 
     def login(self, username_or_email: str, password: str) -> LoginResponse:
         user = self.user_repository.get_by_username_or_email(username_or_email)

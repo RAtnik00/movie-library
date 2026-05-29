@@ -11,6 +11,7 @@ from app.schemas.auth import (
     LoginResponse,
     RefreshTokenRequest,
     LogoutRequest,
+    UpdateAvatarRequest,
 )
 from app.services.auth_service import AuthService
 
@@ -44,6 +45,25 @@ def refresh_token(body: RefreshTokenRequest, db: Session = Depends(get_db)):
     return service.refresh(body.refresh_token)
 
 
+@router.patch("/avatar", response_model=RegisterResponse)
+def update_avatar(
+    body: UpdateAvatarRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    service = AuthService(db)
+    user = service.update_avatar(current_user, body.avatar_url)
+
+    return RegisterResponse(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        birth_date=user.birth_date,
+        created_at=user.created_at,
+        avatar_url=user.avatar_url,
+    )
+
+
 @router.get("/me", response_model=RegisterResponse)
 def get_me(current_user: User = Depends(get_current_user)):
     return RegisterResponse(
@@ -52,4 +72,5 @@ def get_me(current_user: User = Depends(get_current_user)):
         email=current_user.email,
         birth_date=current_user.birth_date,
         created_at=current_user.created_at,
+        avatar_url=current_user.avatar_url,
     )

@@ -12,6 +12,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     birth_date = Column(Date, nullable=True)
+    avatar_url = Column(String(500), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
     favorites = relationship("Favorite", back_populates="user")
