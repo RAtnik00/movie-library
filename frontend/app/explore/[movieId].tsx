@@ -12,7 +12,7 @@ import {
   removeWatchlist,
 } from "@/lib/api";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, ActivityIndicator, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -76,9 +76,8 @@ export default function MovieDetails() {
       }
     };
 
-  useEffect(() => {
     fetchMovie();
-  }, [fetchMovie]);
+  }, [movieId]);
 
   const handleToggleFavorite = async (id: string) => {
     if (!movie) return;
