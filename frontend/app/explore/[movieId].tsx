@@ -51,7 +51,7 @@ export default function MovieDetails() {
         setMovie((prev) => ({
           id: String(data.id),
           title: data.title ?? "Untitled",
-          director: "Unknown director",
+          director: data.director ?? "Unknown director",
           release_date: data.release_date?.slice(0, 4) || "Unknown",
           score:
             typeof data.vote_average === "number"

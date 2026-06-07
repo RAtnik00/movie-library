@@ -1,4 +1,4 @@
-import { UserProfile } from "@/lib/api";
+import { UserProfile } from "@/components/types/UserProfile";
 
 export type AuthContextType = {
   user: UserProfile | null;
