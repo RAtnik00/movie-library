@@ -11,3 +11,4 @@ httpx
 email-validator
 python-multipart
 pytest
+firebase-admin
