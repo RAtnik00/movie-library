@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -14,6 +14,7 @@ from app.schemas.auth import (
     UpdateAvatarRequest,
 )
 from app.services.auth_service import AuthService
+from app.services.firebase_storage_service import FirebaseStorageService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -53,6 +54,28 @@ def update_avatar(
 ):
     service = AuthService(db)
     user = service.update_avatar(current_user, body.avatar_url)
+
+    return RegisterResponse(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        birth_date=user.birth_date,
+        created_at=user.created_at,
+        avatar_url=user.avatar_url,
+    )
+
+
+@router.post("/avatar/upload", response_model=RegisterResponse)
+def upload_avatar(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    storage_service = FirebaseStorageService()
+    avatar_url = storage_service.upload_avatar(current_user.id, file)
+
+    service = AuthService(db)
+    user = service.update_avatar(current_user, avatar_url)
 
     return RegisterResponse(
         id=user.id,

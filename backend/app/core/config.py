@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = "gemini-2.5-flash"
     GEMINI_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta"
 
+    FIREBASE_STORAGE_BUCKET: str | None = None
+    FIREBASE_CREDENTIALS_PATH: str | None = None
+
     @property
     def DATABASE_URL(self) -> str:
         return (
