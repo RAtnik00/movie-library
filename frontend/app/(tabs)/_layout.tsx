@@ -37,15 +37,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="api_test"
-        options={{
-          title: "Test API",
-          tabBarIcon: ({ color }) => (
-            <Ionicons size={28} name="build" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="list"
         options={{
           title: "Lists",
