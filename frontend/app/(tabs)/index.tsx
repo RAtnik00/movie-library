@@ -1,10 +1,12 @@
 import { useAuth } from "@/context/auth-context";
 import { useMovies } from "@/context/movie-context";
 import { Ionicons } from "@expo/vector-icons";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function ProfileCard() {
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, logout } = useAuth();
   const { movies } = useMovies();
 
   const watchedCount = movies.filter((m) => m.watched).length;
@@ -17,31 +19,44 @@ export default function ProfileCard() {
     { label: "Watchlist", value: String(watchlistCount) },
   ];
 
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/(auth)/login");
+  };
+
   return (
     <View style={styles.screen}>
-      <Ionicons name="settings-outline" size={30} style={styles.settingIcon} />
       <View style={styles.container}>
-        <View style={styles.avatarWrapper}>
-          <Image
-            source={{
-              uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJ9Db5WtT-GdWS_C4be_YNL_Oc9FCbWL6tVw&s",
-            }}
-            style={styles.avatar}
-          />
+        <View style={styles.userHeader}>
+          <Text style={styles.name}>{user?.username}</Text>
+          <View style={styles.avatarWrapper}>
+            <Image
+              source={{
+                uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJ9Db5WtT-GdWS_C4be_YNL_Oc9FCbWL6tVw&s",
+              }}
+              style={styles.avatar}
+            />
+          </View>
+
+          <View style={styles.statsRow}>
+            {stats.map((stat, i, arr) => (
+              <View
+                key={stat.label}
+                style={[
+                  styles.statItem,
+                  i < arr.length - 1 && styles.statBorder,
+                ]}
+              >
+                <Text style={styles.statValue}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+              </View>
+            ))}
+          </View>
         </View>
-
-        <Text style={styles.name}>{user?.username ?? "—"}</Text>
-
-        <View style={styles.statsRow}>
-          {stats.map((stat, i, arr) => (
-            <View
-              key={stat.label}
-              style={[styles.statItem, i < arr.length - 1 && styles.statBorder]}
-            >
-              <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-            </View>
-          ))}
+        <View style={styles.userFunctions}>
+          <Pressable onPress={handleLogout} style={styles.logoutBtn}>
+            <Text style={styles.logoutText}>Log out</Text>
+          </Pressable>
         </View>
       </View>
     </View>
@@ -56,9 +71,14 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   container: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  userHeader: {
     width: "100%",
     alignItems: "center",
   },
+  userFunctions: {},
   avatarWrapper: {
     marginBottom: 16,
   },
@@ -103,10 +123,18 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.6,
   },
-  settingIcon: {
-    position: "absolute",
-    color: "#6b7280",
-    top: 40,
-    right: 20,
+  logoutBtn: {
+    marginTop: 8,
+    justifyContent: "flex-end",
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#3a3d42",
+  },
+  logoutText: {
+    color: "#f1f0ff",
+    fontSize: 15,
+    fontWeight: "600",
   },
 });

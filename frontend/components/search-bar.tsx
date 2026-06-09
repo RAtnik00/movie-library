@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 
 interface Props {
   value: string;
@@ -22,6 +22,11 @@ export default function SearchBar({ value, onChange }: Props) {
         value={value}
         onChangeText={onChange}
       />
+      {value.length > 0 && (
+        <Pressable onPress={() => onChange("")} hitSlop={8}>
+          <Ionicons name="close-circle-outline" size={18} color="#b5a5a5" />
+        </Pressable>
+      )}
     </View>
   );
 }

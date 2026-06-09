@@ -20,21 +20,9 @@ type CollectionConfig = {
 };
 
 const COLLECTIONS: CollectionConfig[] = [
-  {
-    label: "Watchlist",
-    route: "/(lists)/watchlist",
-    countKey: "watchlisted",
-  },
-  {
-    label: "Favorite",
-    route: "/(lists)/favorite",
-    countKey: "favorite",
-  },
-  {
-    label: "Watched",
-    route: "/(lists)/watched",
-    countKey: "watched",
-  },
+  { label: "Watched", route: "/(lists)/watched", countKey: "watched" },
+  { label: "Watchlist", route: "/(lists)/watchlist", countKey: "watchlisted" },
+  { label: "Favorite", route: "/(lists)/favorite", countKey: "favorite" },
 ];
 
 export default function ListHubScreen() {
@@ -43,12 +31,11 @@ export default function ListHubScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.heading}>My Lists</Text>
       <ScrollView contentContainerStyle={styles.grid}>
         {COLLECTIONS.map((col) => {
           const collection = movies.filter((m) => m[col.countKey]);
           const count = collection.length;
-          const lastPoster = collection.at(-1)?.poster ?? null;
+          const posters = collection.slice(-7).map((m) => m.poster);
 
           return (
             <Pressable
@@ -59,18 +46,33 @@ export default function ListHubScreen() {
               ]}
               onPress={() => router.push(col.route as any)}
             >
-              <View style={styles.posterWrapper}>
-                <Image
-                  source={{ uri: lastPoster ?? POSTER_FALLBACK }}
-                  style={styles.poster}
-                  resizeMode="cover"
-                />
-                <View />
-              </View>
-
               <View style={styles.info}>
                 <Text style={styles.cardHeader}>{col.label}</Text>
                 <Text style={styles.cardCount}>{count} films</Text>
+              </View>
+
+              <View style={styles.posterWrapper}>
+                {posters.length === 0 ? (
+                  <Image
+                    source={{ uri: POSTER_FALLBACK }}
+                    style={[styles.poster, { left: 0 }]}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  posters.map((uri, i) => (
+                    <Image
+                      key={i}
+                      source={{ uri: uri ?? POSTER_FALLBACK }}
+                      style={[
+                        styles.poster,
+                        {
+                          left: i * 60,
+                        },
+                      ]}
+                      resizeMode="cover"
+                    />
+                  ))
+                )}
               </View>
             </Pressable>
           );
@@ -81,7 +83,7 @@ export default function ListHubScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#1b1d1f" },
+  container: { flex: 1, backgroundColor: "#1b1d1f", paddingTop: 20 },
   heading: {
     color: "white",
     fontSize: 22,
@@ -89,29 +91,30 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     paddingVertical: 14,
   },
-  grid: { paddingHorizontal: 16, gap: 12 },
+  grid: { paddingHorizontal: 16, gap: 14 },
   card: {
     backgroundColor: "#252729",
     borderRadius: 14,
-    flexDirection: "row",
-    alignItems: "flex-start",
     overflow: "hidden",
-    height: 120,
+    flexDirection: "column",
   },
   cardPressed: { opacity: 0.7 },
-  posterWrapper: {
-    width: 90,
-    height: 120,
-  },
-  poster: {
-    width: "100%",
-    height: "100%",
-  },
   info: {
-    flex: 1,
-    paddingHorizontal: 16,
-    gap: 4,
+    paddingHorizontal: 14,
+    paddingTop: 12,
+    paddingBottom: 8,
+    gap: 2,
   },
   cardHeader: { color: "white", fontSize: 17, fontWeight: "600" },
   cardCount: { color: "#6b7280", fontSize: 14 },
+  posterWrapper: {
+    height: 110,
+    position: "relative",
+  },
+  poster: {
+    position: "absolute",
+    width: 80,
+    height: 110,
+    borderColor: "#1b1d1f",
+  },
 });

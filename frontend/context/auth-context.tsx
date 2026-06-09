@@ -1,21 +1,15 @@
-import {
-  loginUser,
-  logoutUser,
-  registerUser,
-  AuthTokens,
-  UserProfile,
-  getMe,
-} from "@/lib/api";
+import { loginUser, logoutUser, registerUser, getMe } from "@/lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { AuthContextType } from "./context-types/auth-context-type";
+import type { UserProfile } from "@/components/types/UserProfile";
+import type { AuthTokens } from "@/components/types/AuthTokens";
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const getAccessToken = async () => AsyncStorage.getItem("access_token");
 
   useEffect(() => {
     const resumeSession = async () => {
@@ -34,6 +28,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     resumeSession();
   }, []);
+
+  function isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.exp * 1000 < Date.now() - 30_000;
+    } catch {
+      return true;
+    }
+  }
+
+  const getAccessToken = async () => AsyncStorage.getItem("access_token");
 
   const login = async (username: string, password: string) => {
     const tokens: AuthTokens = await loginUser(username, password);

@@ -1,4 +1,6 @@
+import MovieComments from "@/components/movie-comments";
 import { Movie } from "@/components/types/movie";
+import EllipsisMenu from "./elipsis-menu";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
@@ -9,7 +11,6 @@ import {
   Text,
   View,
 } from "react-native";
-import EllipsisMenu from "./elipsis-menu";
 
 interface Props {
   movie: Movie;
@@ -54,14 +55,13 @@ export default function MovieDetailsView({
 
   return (
     <ScrollView style={styles.container}>
-      {/*Toolbar*/}
-
+      {/* Toolbar */}
       <View style={styles.header}>
         <Pressable onPress={onBack}>
           <Ionicons
             name="arrow-back"
             size={22}
-            color="white"
+            color="#f1f1f1"
             style={styles.headerIcon}
           />
         </Pressable>
@@ -70,48 +70,58 @@ export default function MovieDetailsView({
             <Ionicons
               name={isFavorite ? "heart" : "heart-outline"}
               size={22}
-              color={isFavorite ? "#ff4d4d" : "white"}
+              color={isFavorite ? "#ff4d4d" : "#f1f1f1"}
               style={styles.headerIcon}
             />
           </Pressable>
-
           <Pressable onPress={handleMarkWatched} style={styles.headerIcon}>
             <Ionicons
               name={isWatched ? "eye" : "eye-outline"}
               size={22}
-              color={isWatched ? "#d0ff4d" : "white"}
+              color={isWatched ? "#d0ff4d" : "#f1f1f1"}
             />
           </Pressable>
-
           <Pressable
             onPress={() => setMenuVisible(true)}
             style={styles.headerIcon}
           >
-            <Ionicons name="ellipsis-vertical" size={22} color="white" />
+            <Ionicons name="ellipsis-vertical" size={22} color="#f1f1f1" />
           </Pressable>
         </View>
       </View>
 
       {/* Poster + info */}
-
       <View style={styles.topSection}>
         <View style={styles.infoBlock}>
           <Text style={styles.title}>{movie.title}</Text>
 
-          {movie.tagline ? (
+          {movie.tagline && (
             <Text style={styles.tagline}>"{movie.tagline}"</Text>
-          ) : null}
+          )}
 
           <Text style={styles.timeDesc}>
             {movie.release_date}
             {movie.runtime ? ` • ${formatRuntime(movie.runtime)}` : ""}
           </Text>
 
-          <Ionicons name="star" style={styles.score} size={16}>
+          {movie.director && movie.director !== "Unknown director" && (
+            <Text style={styles.dirDesc}>Director: {movie.director}</Text>
+          )}
+
+          <Ionicons name="star" style={styles.score} size={18}>
             {movie.score}
           </Ionicons>
-        </View>
 
+          {movie.genres && movie.genres.length > 0 && (
+            <View style={styles.genreRow}>
+              {movie.genres.map((g) => (
+                <View key={g.id} style={styles.genreBadge}>
+                  <Text style={styles.genreText}>{g.name}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
         <Image
           source={{ uri: movie.poster }}
           style={styles.poster}
@@ -119,22 +129,12 @@ export default function MovieDetailsView({
         />
       </View>
 
-      {/* Genres */}
-
-      {movie.genres && movie.genres.length > 0 && (
-        <View style={styles.genreRow}>
-          {movie.genres.map((g) => (
-            <View key={g.id} style={styles.genreBadge}>
-              <Text style={styles.genreText}>{g.name}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {/*Desc */}
-
+      {/* Overview */}
       <Text style={styles.sectionTitle}>Overview</Text>
       <Text style={styles.desc}>{movie.desc}</Text>
+
+      {/* Comments */}
+      <MovieComments tmdbId={Number(movie.id)} />
 
       <EllipsisMenu
         visible={menuVisible}
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   title: {
-    color: "white",
+    color: "#f1f1f1",
     fontSize: 22,
     fontWeight: "bold",
     marginTop: 8,
@@ -220,11 +220,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   genreText: {
-    color: "#ccc",
+    color: "#aaa",
     fontSize: 12,
   },
   sectionTitle: {
-    color: "white",
+    color: "#f1f1f1",
     fontSize: 16,
     fontWeight: "700",
     marginTop: 20,
@@ -235,5 +235,10 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     fontSize: 14,
     marginBottom: 30,
+  },
+  dirDesc: {
+    color: "#aaa",
+    fontSize: 15,
+    marginTop: 3,
   },
 });

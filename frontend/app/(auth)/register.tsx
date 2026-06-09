@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/auth-context";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -13,7 +14,8 @@ import {
 export default function RegisterScreen() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [birthDate, setBirthDate] = useState("");
+  const [birthDate, setBirthDate] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -22,19 +24,13 @@ export default function RegisterScreen() {
   const { register } = useAuth();
   const router = useRouter();
 
-  const handleRegister = async () => {
-    if (
-      !username.trim() ||
-      !email.trim() ||
-      !birthDate.trim() ||
-      !password.trim()
-    ) {
-      setError("Please fill in all fields");
-      return;
-    }
+  const formatDate = (date: Date) => {
+    return date.toISOString().split("T")[0];
+  };
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate.trim())) {
-      setError("Use birth date format YYYY-MM-DD");
+  const handleRegister = async () => {
+    if (!username.trim() || !email.trim() || !birthDate || !password.trim()) {
+      setError("Please fill in all fields");
       return;
     }
 
@@ -47,7 +43,12 @@ export default function RegisterScreen() {
       setIsLoading(true);
       setError(null);
 
-      await register(username.trim(), email.trim(), password, birthDate.trim());
+      await register(
+        username.trim(),
+        email.trim(),
+        password,
+        formatDate(birthDate),
+      );
 
       router.replace("/(tabs)");
     } catch (e) {
@@ -91,17 +92,6 @@ export default function RegisterScreen() {
       />
 
       <TextInput
-        value={birthDate}
-        onChangeText={(t) => {
-          setBirthDate(t);
-          setError(null);
-        }}
-        style={styles.input}
-        placeholder="Birth date (YYYY-MM-DD)"
-        placeholderTextColor="#9ca3af"
-      />
-
-      <TextInput
         value={password}
         onChangeText={(t) => {
           setPassword(t);
@@ -129,10 +119,39 @@ export default function RegisterScreen() {
 
       {error && <Text style={styles.errorText}>{error}</Text>}
 
+      <Pressable style={styles.input} onPress={() => setShowDatePicker(true)}>
+        <Text style={[styles.dateText, !birthDate && styles.placeholderText]}>
+          {birthDate
+            ? birthDate.toLocaleDateString("en-GB")
+            : "Select birth date"}
+        </Text>
+      </Pressable>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={birthDate ?? new Date(2000, 0, 1)}
+          mode="date"
+          display="spinner"
+          maximumDate={new Date()}
+          onChange={(event, selectedDate) => {
+            if (event.type === "dismissed") {
+              setShowDatePicker(false);
+              return;
+            }
+
+            if (selectedDate) {
+              setBirthDate(selectedDate);
+            }
+
+            setShowDatePicker(false);
+          }}
+        />
+      )}
+
       <Pressable
         onPress={handleRegister}
         disabled={isLoading}
-        style={[styles.registerButton]}
+        style={styles.registerButton}
       >
         {isLoading ? (
           <ActivityIndicator color="white" />
@@ -166,6 +185,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 50,
   },
+
   title: {
     color: "#ffffff",
     fontSize: 32,
@@ -188,6 +208,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     borderWidth: 1,
     borderColor: "#33373b",
+  },
+
+  dateText: {
+    color: "#ffffff",
+    fontSize: 15,
+  },
+
+  placeholderText: {
+    color: "#9ca3af",
   },
 
   errorText: {
