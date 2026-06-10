@@ -58,6 +58,9 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const fetchCollectionIds = async () =>
+    Promise.all([fetchFavoriteIds(), fetchWatchedIds(), fetchWatchlistIds()]);
+
   const applyStatuses = (
     movieList: Movie[],
     favoriteIds: Set<string>,
@@ -76,15 +79,13 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       setError(null);
       setPage(1);
-      const [popularMovies, favoriteIds, watchedIds, watchlistIds] =
-        await Promise.all([
-          getPopularMovies(1),
-          fetchFavoriteIds(),
-          fetchWatchedIds(),
-          fetchWatchlistIds(),
-        ]);
-      setMovies(
-        applyStatuses(popularMovies, favoriteIds, watchedIds, watchlistIds),
+      const popularMovies = await getPopularMovies(1);
+      setMovies(popularMovies);
+      setIsLoading(false);
+
+      const [favoriteIds, watchedIds, watchlistIds] = await fetchCollectionIds();
+      setMovies((currentMovies) =>
+        applyStatuses(currentMovies, favoriteIds, watchedIds, watchlistIds),
       );
     } catch {
       setError("Failed to load movies");
@@ -98,18 +99,15 @@ export function MoviesProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoadingMore(true);
       const nextPage = page + 1;
-      const [moreMovies, favoriteIds, watchedIds, watchlistIds] =
-        await Promise.all([
-          getPopularMovies(nextPage),
-          fetchFavoriteIds(),
-          fetchWatchedIds(),
-          fetchWatchlistIds(),
-        ]);
-      setMovies((prev) => [
-        ...prev,
-        ...applyStatuses(moreMovies, favoriteIds, watchedIds, watchlistIds),
-      ]);
+      const moreMovies = await getPopularMovies(nextPage);
+      setMovies((prev) => [...prev, ...moreMovies]);
       setPage(nextPage);
+      setIsLoadingMore(false);
+
+      const [favoriteIds, watchedIds, watchlistIds] = await fetchCollectionIds();
+      setMovies((currentMovies) =>
+        applyStatuses(currentMovies, favoriteIds, watchedIds, watchlistIds),
+      );
     } finally {
       setIsLoadingMore(false);
     }

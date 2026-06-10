@@ -9,18 +9,24 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [hasSession, setHasSession] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const resumeSession = async () => {
       try {
         const access_token = await AsyncStorage.getItem("access_token");
-        if (access_token) {
-          const profile = await getMe(access_token);
-          setUser(profile);
-        }
+        if (!access_token) return;
+
+        setHasSession(true);
+        setIsLoading(false);
+
+        const profile = await getMe(access_token);
+        setUser(profile);
       } catch {
         await AsyncStorage.multiRemove(["access_token", "refresh_token"]);
+        setHasSession(false);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -44,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const tokens: AuthTokens = await loginUser(username, password);
     await AsyncStorage.setItem("access_token", tokens.access_token);
     await AsyncStorage.setItem("refresh_token", tokens.refresh_token);
+    setHasSession(true);
     const profile = await getMe(tokens.access_token);
     setUser(profile);
   };
@@ -64,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (refresh_token) await logoutUser(refresh_token);
     } finally {
       await AsyncStorage.multiRemove(["access_token", "refresh_token"]);
+      setHasSession(false);
       setUser(null);
     }
   };
@@ -72,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        isLoggedIn: !!user,
+        isLoggedIn: hasSession || !!user,
         isLoading,
         login,
         register,

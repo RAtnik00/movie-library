@@ -1,4 +1,5 @@
 import { Movie } from "@/components/types/movie";
+import Constants from "expo-constants";
 import { Platform } from "react-native";
 import type { TmdbMovie } from "@/components/types/TmbdbMovie";
 import type { AuthTokens } from "@/components/types/AuthTokens";
@@ -6,17 +7,77 @@ import type { UserProfile } from "@/components/types/UserProfile";
 import type { TmdbMoviesResponse } from "@/components/types/TmdbMoviesResponse";
 import { MovieComment } from "@/components/types/MovieComment";
 
-const DEFAULT_API_URL =
-  Platform.OS === "android" ? "http://10.0.2.2:8000" : "http://localhost:8000";
+function getExpoDevServerHost(): string | null {
+  const constants = Constants as typeof Constants & {
+    expoGoConfig?: { debuggerHost?: string | null } | null;
+    expoConfig?: { hostUri?: string | null } | null;
+    manifest?: { debuggerHost?: string | null; hostUri?: string | null } | null;
+    manifest2?: {
+      extra?: { expoClient?: { hostUri?: string | null } };
+    } | null;
+  };
+
+  const hostCandidates = [
+    constants.expoConfig?.hostUri,
+    constants.expoGoConfig?.debuggerHost,
+    constants.manifest2?.extra?.expoClient?.hostUri,
+    constants.manifest?.debuggerHost,
+    constants.manifest?.hostUri,
+  ];
+
+  for (const hostUri of hostCandidates) {
+    const host = hostUri
+      ?.replace(/^[a-z]+:\/\//i, "")
+      .split("/")[0]
+      .split(":")[0];
+
+    if (host && !["localhost", "127.0.0.1", "::1"].includes(host)) {
+      return host;
+    }
+  }
+
+  return null;
+}
+
+function getDefaultApiUrl(): string {
+  if (Platform.OS === "android") return "http://10.0.2.2:8000";
+
+  const devServerHost = getExpoDevServerHost();
+  return devServerHost ? `http://${devServerHost}:8000` : "http://localhost:8000";
+}
+
+const DEFAULT_API_URL = getDefaultApiUrl();
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL;
+
+if (process.env.NODE_ENV !== "production") {
+  console.log(`[api] API_URL=${API_URL}`);
+}
 
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 const POSTER_FALLBACK_URL =
   "https://dummyimage.com/500x750/1b1d1f/ffffff&text=No+Poster";
+const REQUEST_TIMEOUT_MS = 8000;
 
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
+
+async function fetchWithTimeout(
+  url: string,
+  options?: RequestInit,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 async function getNewToken(): Promise<string | null> {
   if (isRefreshing && refreshPromise) return refreshPromise;
@@ -30,7 +91,7 @@ async function getNewToken(): Promise<string | null> {
       const storedRefresh = await AsyncStorage.getItem("refresh_token");
       if (!storedRefresh) return null;
 
-      const response = await fetch(`${API_URL}/auth/refresh`, {
+      const response = await fetchWithTimeout(`${API_URL}/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh_token: storedRefresh }),
@@ -54,7 +115,7 @@ async function getNewToken(): Promise<string | null> {
 }
 
 async function apiRequest<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, options);
+  const response = await fetchWithTimeout(`${API_URL}${path}`, options);
 
   if (response.status === 401) {
     const newToken = await getNewToken();
@@ -70,7 +131,10 @@ async function apiRequest<T>(path: string, options?: RequestInit): Promise<T> {
       },
     };
 
-    const retryResponse = await fetch(`${API_URL}${path}`, retryOptions);
+    const retryResponse = await fetchWithTimeout(
+      `${API_URL}${path}`,
+      retryOptions,
+    );
     if (!retryResponse.ok) {
       const errorData = await retryResponse.json().catch(() => ({}));
       throw new Error(
