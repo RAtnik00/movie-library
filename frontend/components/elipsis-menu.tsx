@@ -3,22 +3,16 @@ import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onToggleFavorite: () => void;
-  onMarkWatched: () => void;
   onToggleWatchlist: () => void;
-  isFavorite: boolean;
-  isWatched: boolean;
+  onSetReminder: () => void;
   isWatchlisted: boolean;
 }
 
 export default function EllipsisMenu({
   visible,
   onClose,
-  onToggleFavorite,
-  onMarkWatched,
   onToggleWatchlist,
-  isFavorite,
-  isWatched,
+  onSetReminder,
   isWatchlisted,
 }: Props) {
   return (
@@ -33,30 +27,6 @@ export default function EllipsisMenu({
           <Pressable
             style={styles.item}
             onPress={() => {
-              onToggleFavorite();
-              onClose();
-            }}
-          >
-            <Text style={styles.text}>
-              {isFavorite ? "Remove from favorites" : "Add to favorites"}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            style={[styles.item, styles.borderedItem]}
-            onPress={() => {
-              onMarkWatched();
-              onClose();
-            }}
-          >
-            <Text style={styles.text}>
-              {isWatched ? "Remove from watched" : "Add to watched"}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            style={[styles.item, styles.borderedItem]}
-            onPress={() => {
               onToggleWatchlist();
               onClose();
             }}
@@ -64,6 +34,16 @@ export default function EllipsisMenu({
             <Text style={styles.text}>
               {isWatchlisted ? "Remove from watchlist" : "Add to watchlist"}
             </Text>
+          </Pressable>
+
+          <Pressable
+            style={[styles.item, styles.borderedItem]}
+            onPress={() => {
+              onSetReminder();
+              onClose();
+            }}
+          >
+            <Text style={styles.text}>Set reminder</Text>
           </Pressable>
         </View>
       </Pressable>
