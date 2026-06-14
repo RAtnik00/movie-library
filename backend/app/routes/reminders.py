@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -73,16 +73,15 @@ def update_reminder(
     return reminder
 
 
-@router.delete("/{reminder_id}", response_model=MovieReminderResponse)
+@router.delete("/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_reminder(
     reminder_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-):
+) -> Response:
     service = ReminderService(db)
-    reminder = service.remove(current_user, reminder_id)
 
-    if reminder is None:
+    if not service.remove(current_user, reminder_id):
         raise HTTPException(status_code=404, detail="Reminder not found")
 
-    return reminder
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

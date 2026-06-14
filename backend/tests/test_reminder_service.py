@@ -192,6 +192,33 @@ def test_remove_deletes_reminder_and_commits():
 
     result = service.remove(User(id=1), reminder_id=99)
 
-    assert result is reminder
+    assert result is True
     assert repository.deleted_reminder is reminder
     assert db.committed
+
+
+def test_remove_returns_false_when_reminder_is_missing():
+    db = FakeDb()
+    service = make_reminder_service(
+        db=db,
+        reminder_repository=FakeReminderRepository(reminder=None),
+    )
+
+    result = service.remove(User(id=1), reminder_id=99)
+
+    assert result is False
+    assert not db.committed
+
+
+def test_remove_rejects_non_owner():
+    db = FakeDb()
+    reminder = MovieReminder(user_id=2, movie_id=10)
+    repository = FakeReminderRepository(reminder=reminder)
+    service = make_reminder_service(db=db, reminder_repository=repository)
+
+    with pytest.raises(HTTPException) as error:
+        service.remove(User(id=1), reminder_id=99)
+
+    assert error.value.status_code == 403
+    assert repository.deleted_reminder is None
+    assert not db.committed

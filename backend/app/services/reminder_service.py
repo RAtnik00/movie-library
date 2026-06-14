@@ -68,16 +68,16 @@ class ReminderService:
         self.db.refresh(reminder)
         return reminder
 
-    def remove(self, user: User, reminder_id: int) -> MovieReminder | None:
+    def remove(self, user: User, reminder_id: int) -> bool:
         reminder = self.reminder_repository.get_by_id(reminder_id)
         if reminder is None:
-            return None
+            return False
 
         self._ensure_owner(reminder, user)
 
         self.reminder_repository.delete(reminder)
         self.db.commit()
-        return reminder
+        return True
 
     def _ensure_owner(self, reminder: MovieReminder, user: User) -> None:
         if reminder.user_id != user.id:
