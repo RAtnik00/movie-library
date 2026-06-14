@@ -17,6 +17,7 @@ interface Props {
   onToggleFavorite: (id: string) => void;
   onMarkWatched: (id: string) => void;
   onToggleWatchlist: (id: string) => void;
+  onSetReminder: (id: string) => void;
   onBack: () => void;
 }
 
@@ -31,6 +32,7 @@ export default function MovieDetailsView({
   onToggleFavorite,
   onMarkWatched,
   onToggleWatchlist,
+  onSetReminder,
   onBack,
 }: Props) {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -51,6 +53,10 @@ export default function MovieDetailsView({
   const handleToggleWatchlist = () => {
     setIsWatchlisted((prev) => !prev);
     onToggleWatchlist(movie.id);
+  };
+
+  const handleSetReminder = () => {
+    onSetReminder(movie.id);
   };
 
   return (
@@ -139,12 +145,9 @@ export default function MovieDetailsView({
       <EllipsisMenu
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
-        isFavorite={isFavorite}
-        onToggleFavorite={handleToggleFavorite}
-        isWatched={isWatched}
-        onMarkWatched={handleMarkWatched}
         isWatchlisted={isWatchlisted}
         onToggleWatchlist={handleToggleWatchlist}
+        onSetReminder={handleSetReminder}
       />
     </ScrollView>
   );

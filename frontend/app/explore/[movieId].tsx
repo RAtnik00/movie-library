@@ -10,11 +10,13 @@ import {
   removeWatched,
   addWatchlist,
   removeWatchlist,
+  createReminder,
 } from "@/lib/api";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, ActivityIndicator, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ReminderModal from "@/components/reminder-modal";
 
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 const POSTER_FALLBACK_URL =
@@ -25,13 +27,8 @@ export default function MovieDetails() {
 
   const router = useRouter();
 
-  const {
-    movies,
-    toggleFavorite,
-    toggleWatched,
-    toggleWatchlisted,
-    deleteMovie,
-  } = useMovies();
+  const { movies, toggleFavorite, toggleWatched, toggleWatchlisted } =
+    useMovies();
 
   const { getAccessToken } = useAuth();
 
@@ -40,6 +37,24 @@ export default function MovieDetails() {
   );
 
   const [isLoading, setIsLoading] = useState(true);
+  const [reminderModalVisible, setReminderModalVisible] = useState(false);
+
+  const handleCreateReminder = async (date: Date, note: string | null) => {
+    const token = await getAccessToken();
+    if (!token) {
+      Alert.alert("Error", "You must be logged in");
+      return;
+    }
+    try {
+      await createReminder(Number(movie?.id), date, note, token);
+      Alert.alert(
+        "Reminder set",
+        `You'll be reminded on ${date.toLocaleDateString()}`,
+      );
+    } catch {
+      Alert.alert("Error", "Failed to set reminder");
+    }
+  };
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -181,7 +196,13 @@ export default function MovieDetails() {
         onToggleFavorite={handleToggleFavorite}
         onMarkWatched={handleMarkWatched}
         onToggleWatchlist={handleToggleWatchlist}
+        onSetReminder={() => setReminderModalVisible(true)}
         onBack={() => router.back()}
+      />
+      <ReminderModal
+        visible={reminderModalVisible}
+        onConfirm={handleCreateReminder}
+        onClose={() => setReminderModalVisible(false)}
       />
     </SafeAreaView>
   );

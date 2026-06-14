@@ -35,7 +35,7 @@ export default function ListHubScreen() {
         {COLLECTIONS.map((col) => {
           const collection = movies.filter((m) => m[col.countKey]);
           const count = collection.length;
-          const posters = collection.slice(-7).map((m) => m.poster);
+          const posters = collection.slice(-6).map((m) => m.poster);
 
           return (
             <Pressable
@@ -66,7 +66,7 @@ export default function ListHubScreen() {
                       style={[
                         styles.poster,
                         {
-                          left: i * 60,
+                          left: i * 55,
                         },
                       ]}
                       resizeMode="cover"

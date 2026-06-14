@@ -31,14 +31,14 @@ function RootNavigator() {
 
   return (
     <Stack
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: "#1b1d1f" },
+        animation: "none",
+      }}
       initialRouteName={isLoggedIn ? "(tabs)" : "(auth)/login"}
     >
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen
-        name="modal"
-        options={{ presentation: "modal", headerShown: true, title: "Modal" }}
-      />
       <Stack.Screen name="explore/[movieId]" options={{ animation: "none" }} />
     </Stack>
   );
