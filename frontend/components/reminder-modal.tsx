@@ -1,12 +1,15 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useEffect, useState } from "react";
 import {
+  KeyboardAvoidingView,
   Modal,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
+  Platform,
+  ScrollView,
 } from "react-native";
 
 interface Props {
@@ -45,80 +48,88 @@ export default function ReminderModal({
   return (
     <Modal transparent visible={visible}>
       <Pressable style={styles.overlay} onPress={onClose}>
-        <View style={styles.sheet}>
-          {/* Header */}
-          <View style={styles.row}>
-            <Pressable onPress={onClose}>
-              <Text style={styles.cancel}>Cancel</Text>
-            </Pressable>
-            <Text style={styles.title}>Set Reminder</Text>
-            <Pressable onPress={handleConfirm}>
-              <Text style={styles.done}>Done</Text>
-            </Pressable>
-          </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <ScrollView
+            style={styles.sheet}
+            contentContainerStyle={styles.sheetContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Header */}
+            <View style={styles.row}>
+              <Pressable onPress={onClose}>
+                <Text style={styles.cancel}>Cancel</Text>
+              </Pressable>
+              <Text style={styles.title}>Set Reminder</Text>
+              <Pressable onPress={handleConfirm}>
+                <Text style={styles.done}>Done</Text>
+              </Pressable>
+            </View>
 
-          {/* Date / Time triggers */}
-          <View style={styles.row}>
-            <Pressable
-              style={styles.segment}
-              onPress={() => {
-                setPickerMode("date");
-                setShowPicker(true);
-              }}
-            >
-              <Text style={styles.segmentLabel}>DATE</Text>
-              <Text style={styles.segmentValue}>
-                {date.toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </Text>
-            </Pressable>
+            {/* Date / Time triggers */}
+            <View style={styles.row}>
+              <Pressable
+                style={styles.segment}
+                onPress={() => {
+                  setPickerMode("date");
+                  setShowPicker(true);
+                }}
+              >
+                <Text style={styles.segmentLabel}>DATE</Text>
+                <Text style={styles.segmentValue}>
+                  {date.toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </Text>
+              </Pressable>
 
-            <Pressable
-              style={styles.segment}
-              onPress={() => {
-                setPickerMode("time");
-                setShowPicker(true);
-              }}
-            >
-              <Text style={styles.segmentLabel}>TIME</Text>
-              <Text style={styles.segmentValue}>
-                {date.toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                })}
-              </Text>
-            </Pressable>
-          </View>
+              <Pressable
+                style={styles.segment}
+                onPress={() => {
+                  setPickerMode("time");
+                  setShowPicker(true);
+                }}
+              >
+                <Text style={styles.segmentLabel}>TIME</Text>
+                <Text style={styles.segmentValue}>
+                  {date.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  })}
+                </Text>
+              </Pressable>
+            </View>
 
-          {/* Picker */}
-          {showPicker && (
-            <DateTimePicker
-              value={date}
-              mode={pickerMode}
-              display="spinner"
-              minimumDate={pickerMode === "date" ? new Date() : undefined}
-              textColor="#f1f1f1"
-              onChange={(_, d) => {
-                setShowPicker(false);
-                if (d) setDate(d);
-              }}
+            {/* Picker */}
+            {showPicker && (
+              <DateTimePicker
+                value={date}
+                mode={pickerMode}
+                display="spinner"
+                minimumDate={pickerMode === "date" ? new Date() : undefined}
+                textColor="#f1f1f1"
+                onChange={(_, d) => {
+                  setShowPicker(false);
+                  if (d) setDate(d);
+                }}
+              />
+            )}
+
+            {/* Note */}
+            <TextInput
+              style={styles.note}
+              placeholder="Add a note (optional)"
+              placeholderTextColor="#7d7a7a"
+              value={note}
+              onChangeText={setNote}
+              multiline
             />
-          )}
-
-          {/* Note */}
-          <TextInput
-            style={styles.note}
-            placeholder="Add a note (optional)"
-            placeholderTextColor="#7d7a7a"
-            value={note}
-            onChangeText={setNote}
-            multiline
-          />
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Pressable>
     </Modal>
   );
@@ -134,6 +145,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#25282b",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+  },
+  sheetContent: {
     paddingBottom: 30,
     gap: 10,
   },
