@@ -73,15 +73,16 @@ def update_reminder(
     return reminder
 
 
-@router.delete("/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{reminder_id}", response_model=MovieReminderResponse)
 def delete_reminder(
     reminder_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> Response:
+):
     service = ReminderService(db)
+    reminder = service.remove(current_user, reminder_id)
 
-    if not service.remove(current_user, reminder_id):
+    if reminder is None:
         raise HTTPException(status_code=404, detail="Reminder not found")
 
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return reminder
