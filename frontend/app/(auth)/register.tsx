@@ -2,6 +2,7 @@ import { useAuth } from "@/context/auth-context";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { z } from "zod";
 import {
   ActivityIndicator,
   Pressable,
@@ -10,6 +11,25 @@ import {
   TextInput,
   View,
 } from "react-native";
+
+const registerSchema = z
+  .object({
+    username: z
+      .string()
+      .trim()
+      .min(3, "Username must be at least 3 characters"),
+    email: z
+      .string()
+      .trim()
+      .pipe(z.email({ message: "Enter a valid email address" })),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string(),
+    birthDate: z.date({ message: "Please select your birth date" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 export default function RegisterScreen() {
   const [username, setUsername] = useState("");
@@ -24,18 +44,19 @@ export default function RegisterScreen() {
   const { register } = useAuth();
   const router = useRouter();
 
-  const formatDate = (date: Date) => {
-    return date.toISOString().split("T")[0];
-  };
+  const formatDate = (date: Date) => date.toISOString().split("T")[0];
 
   const handleRegister = async () => {
-    if (!username.trim() || !email.trim() || !birthDate || !password.trim()) {
-      setError("Please fill in all fields");
-      return;
-    }
+    const result = registerSchema.safeParse({
+      username,
+      email,
+      password,
+      confirmPassword,
+      birthDate,
+    });
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+    if (!result.success) {
+      setError(result.error.issues[0].message);
       return;
     }
 
@@ -43,16 +64,12 @@ export default function RegisterScreen() {
       setIsLoading(true);
       setError(null);
 
-      await register(
-        username.trim(),
-        email.trim(),
-        password,
-        formatDate(birthDate),
-      );
+      const { username: u, email: e, password: p, birthDate: b } = result.data;
+      await register(u, e, p, formatDate(b));
 
       router.replace("/(tabs)");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Registration failed");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +79,6 @@ export default function RegisterScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Create Account</Text>
-
         <Text style={styles.subtitle}>Register to continue using the app</Text>
       </View>
 
@@ -138,11 +154,10 @@ export default function RegisterScreen() {
               setShowDatePicker(false);
               return;
             }
-
             if (selectedDate) {
               setBirthDate(selectedDate);
+              setError(null);
             }
-
             setShowDatePicker(false);
           }}
         />

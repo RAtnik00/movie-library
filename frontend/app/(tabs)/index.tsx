@@ -1,13 +1,21 @@
 import { useAuth } from "@/context/auth-context";
 import { useMovies } from "@/context/movie-context";
-import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import RecentlyWatched from "@/components/recently-watched";
+
+const AVATAR_STORAGE_KEY = "local_avatar_uri";
+const DEFAULT_AVATAR =
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJ9Db5WtT-GdWS_C4be_YNL_Oc9FCbWL6tVw&s";
 
 export default function ProfileCard() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { movies } = useMovies();
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
 
   const watchedCount = movies.filter((m) => m.watched).length;
   const favoriteCount = movies.filter((m) => m.favorite).length;
@@ -19,9 +27,39 @@ export default function ProfileCard() {
     { label: "Watchlist", value: String(watchlistCount) },
   ];
 
+  useEffect(() => {
+    AsyncStorage.getItem(AVATAR_STORAGE_KEY).then((uri) => {
+      if (uri) setAvatarUri(uri);
+    });
+  }, []);
+
   const handleLogout = async () => {
     await logout();
     router.replace("/(auth)/login");
+  };
+
+  const handleChangeAvatar = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(
+        "Permission needed",
+        "Allow access to your photos to change your avatar",
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (result.canceled) return;
+
+    const uri = result.assets[0].uri;
+    setAvatarUri(uri);
+    await AsyncStorage.setItem(AVATAR_STORAGE_KEY, uri);
   };
 
   return (
@@ -31,9 +69,7 @@ export default function ProfileCard() {
           <Text style={styles.name}>{user?.username}</Text>
           <View style={styles.avatarWrapper}>
             <Image
-              source={{
-                uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTJ9Db5WtT-GdWS_C4be_YNL_Oc9FCbWL6tVw&s",
-              }}
+              source={{ uri: avatarUri ?? DEFAULT_AVATAR }}
               style={styles.avatar}
             />
           </View>
@@ -52,10 +88,17 @@ export default function ProfileCard() {
               </View>
             ))}
           </View>
+
+          <RecentlyWatched />
         </View>
+
         <View style={styles.userFunctions}>
-          <Pressable onPress={handleLogout} style={styles.logoutBtn}>
-            <Text style={styles.logoutText}>Log out</Text>
+          <Pressable onPress={handleChangeAvatar} style={styles.accountBtn}>
+            <Text style={styles.accountText}>Change avatar</Text>
+          </Pressable>
+
+          <Pressable onPress={handleLogout} style={styles.accountBtn}>
+            <Text style={styles.accountText}>Log out</Text>
           </Pressable>
         </View>
       </View>
@@ -78,7 +121,9 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
-  userFunctions: {},
+  userFunctions: {
+    gap: 10,
+  },
   avatarWrapper: {
     marginBottom: 16,
   },
@@ -123,16 +168,17 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.6,
   },
-  logoutBtn: {
+  accountBtn: {
     marginTop: 8,
-    justifyContent: "flex-end",
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#3a3d42",
   },
-  logoutText: {
+  accountText: {
     color: "#f1f0ff",
     fontSize: 15,
     fontWeight: "600",
