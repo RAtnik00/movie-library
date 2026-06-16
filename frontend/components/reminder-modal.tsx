@@ -3,13 +3,13 @@ import { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
-  Platform,
-  ScrollView,
 } from "react-native";
 
 interface Props {
@@ -47,12 +47,14 @@ export default function ReminderModal({
 
   return (
     <Modal transparent visible={visible}>
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <Pressable style={styles.backdrop} onPress={onClose} />
+
+        <View style={styles.sheet}>
           <ScrollView
-            style={styles.sheet}
             contentContainerStyle={styles.sheetContent}
             keyboardShouldPersistTaps="handled"
           >
@@ -129,8 +131,8 @@ export default function ReminderModal({
               multiline
             />
           </ScrollView>
-        </KeyboardAvoidingView>
-      </Pressable>
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -138,13 +140,21 @@ export default function ReminderModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "#1b1d1f93",
     justifyContent: "flex-end",
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#1b1d1f93",
   },
   sheet: {
     backgroundColor: "#25282b",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    maxHeight: "80%",
   },
   sheetContent: {
     paddingBottom: 30,
